@@ -25,6 +25,20 @@
     },
   ];
 
+  var sceneProfile = window.DemoSceneProfile || {};
+  if (window.DemoSceneApply && typeof window.DemoSceneApply.apply === 'function') {
+    window.DemoSceneApply.apply();
+  }
+  if (sceneProfile.welcomeSuggestions && sceneProfile.welcomeSuggestions.length) {
+    WELCOME_SUGGESTIONS = sceneProfile.welcomeSuggestions;
+  }
+
+  function getSceneAgentName() {
+    if (sceneProfile.agentName) return sceneProfile.agentName;
+    if (typeof BenchmarkMatrix !== 'undefined' && BenchmarkMatrix.agentName) return BenchmarkMatrix.agentName;
+    return '数据对标智能体';
+  }
+
   var MOCK = {
     energyConsumption: [
       { year: '2022', electricity: '1.82', gas: '0.95', steam: '3.20', total: '5.97' },
@@ -104,9 +118,9 @@
     inputMode: '直接回答',
   };
 
-  var HISTORY_KEY = 'dataBenchmarkAgentHistory';
-  var ACTIVE_KEY = 'dataBenchmarkAgentActiveId';
-  var LEGACY_KEY = 'dataBenchmarkAgentSession';
+  var HISTORY_KEY = sceneProfile.historyKey || 'dataBenchmarkAgentHistory';
+  var ACTIVE_KEY = sceneProfile.activeKey || 'dataBenchmarkAgentActiveId';
+  var LEGACY_KEY = sceneProfile.legacyKey || 'dataBenchmarkAgentSession';
 
   var activeSessionId = null;
   var sendBtn, welcome, messagesEl, scrollEl, greetingEl, inputEl, modeBtn, modeDropdown, modeLabel, voiceBtn, voiceStatusEl;
@@ -120,6 +134,9 @@
   var lastUserText = '';
 
   function init() {
+    if (window.DemoSceneApply && typeof window.DemoSceneApply.apply === 'function') {
+      window.DemoSceneApply.apply();
+    }
     sendBtn = document.getElementById('cta-send');
     welcome = document.getElementById('cta-welcome');
     messagesEl = document.getElementById('cta-messages');
@@ -147,7 +164,7 @@
         userAvatarHtml: userAvatarHtml,
         saveSession: saveSession,
         ensureChatVisible: ensureChatVisible,
-        getAgentName: function () { return '数据对标智能体'; },
+        getAgentName: function () { return getSceneAgentName(); },
         getLastConfidence: function () { return lastConfidence; },
       });
     }
@@ -460,7 +477,7 @@
   }
 
   function assistantAvatarHtml() {
-    return '<div class="cta-msg__avatar cta-msg__avatar--assistant" aria-hidden="true" title="绿色低碳节能改造智能体">' +
+    return '<div class="cta-msg__avatar cta-msg__avatar--assistant" aria-hidden="true" title="' + escAttr(getSceneAgentName()) + '">' +
       '<img class="cta-msg__avatar-img" src="' + escAttr(getAgentIconSrc()) + '" alt="" />' +
     '</div>';
   }

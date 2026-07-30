@@ -15,31 +15,23 @@
       border-radius: 20px;
       box-shadow: 0 12px 40px rgba(0, 184, 107, 0.1);
     }
-    .placeholder h1 {
-      margin: 0 0 16px;
-      font-size: 32px;
-      line-height: 1.3;
-    }
-    .placeholder p {
-      margin: 0 0 28px;
-      font-size: 18px;
-      line-height: 1.7;
-      color: #475467;
-    }
+    .placeholder h1 { margin: 0 0 16px; font-size: 32px; line-height: 1.3; }
+    .placeholder p { margin: 0 0 20px; font-size: 18px; line-height: 1.7; color: #475467; }
+    .placeholder__actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
     .placeholder a {
-      display: inline-flex;
-      font-size: 17px;
-      font-weight: 600;
-      color: #00b86b;
-      text-decoration: none;
+      display: inline-flex; font-size: 17px; font-weight: 600;
+      color: #00b86b; text-decoration: none;
     }
   </style>
 </head>
 <body>
   <main class="placeholder">
     <h1>绿色低碳管理平台演示场景</h1>
-    <p>该场景演示页正在筹备中。您可先体验「数字碳表演示」或「集团碳账本演示」，并通过大屏左下角智能体进入数据对标问答。</p>
-    <a href="./index.html">← 返回场景选择</a>
+    <p>平台大屏仍在筹备中。该场景的智能体对话工程已单独拆分，可先体验对话能力；后续大屏上线后再挂接左下角智能体入口。</p>
+    <div class="placeholder__actions">
+      <a href="./agents/green-platform/">进入绿色低碳管理智能体 →</a>
+      <a href="./index.html">← 返回场景选择</a>
+    </div>
   </main>
 </body>
 </html>

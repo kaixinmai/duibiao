@@ -54,13 +54,18 @@ var BenchmarkAuthGuard = {
 var BenchmarkSessionStore = {
   STORAGE_KEY: 'data_benchmark_sessions',
 
+  getStorageKey: function () {
+    var scene = window.DemoSceneProfile || {};
+    return scene.sessionStoreKey || this.STORAGE_KEY;
+  },
+
   getUserKey: function () {
     return 'default';
   },
 
   getAll: function () {
     try {
-      var all = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '{}');
+      var all = JSON.parse(localStorage.getItem(this.getStorageKey()) || '{}');
       return all[this.getUserKey()] || [];
     } catch (e) {
       return [];
@@ -81,12 +86,12 @@ var BenchmarkSessionStore = {
       messageCount: (messages || []).length,
     };
     try {
-      var all = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '{}');
+      var all = JSON.parse(localStorage.getItem(this.getStorageKey()) || '{}');
       var list = all[key] || [];
       list.unshift(entry);
       if (list.length > 20) list = list.slice(0, 20);
       all[key] = list;
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(all));
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(all));
       return true;
     } catch (e) {
       return false;
