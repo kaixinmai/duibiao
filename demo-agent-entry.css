@@ -13,9 +13,12 @@
 }
 
 .demo-agent__avatar {
-  width: 120px;
-  height: auto;
+  width: auto;
+  height: 200px;
+  max-width: 280px;
   display: block;
+  object-fit: contain;
+  object-position: left bottom;
   filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.28));
   transition: transform 0.2s ease;
 }
@@ -67,7 +70,8 @@
 
 @media (max-width: 900px) {
   .demo-agent__avatar {
-    width: 88px;
+    height: 140px;
+    max-width: 200px;
   }
 
   .demo-agent__bubble {
