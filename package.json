@@ -1,0 +1,17 @@
+{
+  "name": "carbon-target-agent",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "netlify:deploy": "bash scripts/netlify-deploy.sh",
+    "netlify:watch": "bash scripts/netlify-watch.sh"
+  },
+  "devDependencies": {
+    "chokidar-cli": "^3.0.0",
+    "netlify-cli": "^23.11.1",
+    "vite": "^6.0.5"
+  }
+}

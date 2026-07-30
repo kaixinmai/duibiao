@@ -1,0 +1,150 @@
+/**
+ * 双碳智能体 · 全局绿色低碳 Design System
+ * 主系统 / 生态环境 / 发改委 / 企业服务 统一引用
+ *
+ * 依据设计规范（白绿生态企业级）
+ */
+:root {
+  /* ── Brand Tokens ── */
+  --gc-primary: #00b86b;
+  --gc-primary-hover: #00995a;
+  --gc-primary-pressed: #008f53;
+  --gc-primary-selected-text: #00a866;
+  --gc-secondary: #22c7a3;
+  --gc-data-aux: #2db7b5;
+  --gc-mint: #7ad9b3;
+  --gc-soft: #ddf8eb;
+  --gc-soft-2: #f0f8f4;
+  --gc-bg: #eef6f1;
+  --gc-bg-elevated: #ffffff;
+  --gc-card: #ffffff;
+  --gc-module: #e7f3ec;
+  --gc-border: #d8ece2;
+  --gc-border-strong: #b7dccb;
+  /* 侧栏中性灰（与主区薄荷绿区分） */
+  --gc-sidebar-bg: #e8ecf1;
+  --gc-sidebar-bg-deep: #dde3ea;
+  --gc-sidebar-border: #d0d5dd;
+  --gc-sidebar-item: #ffffff;
+  --gc-sidebar-item-hover: #f4f6f8;
+  --gc-text: #101828;
+  --gc-text-body: #475467;
+  --gc-text-secondary: #475467;
+  --gc-text-muted: #98a2b3;
+  --gc-danger: #f04438;
+  --gc-warning: #f79009;
+  --gc-info: #22c7a3;
+  --gc-shadow: 0 4px 20px rgba(0, 184, 107, 0.08);
+  --gc-shadow-hover: 0 8px 28px rgba(0, 184, 107, 0.14);
+  --gc-radius: 12px;
+  --gc-radius-sm: 8px;
+  --gc-radius-lg: 16px;
+  --gc-font: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+  --gc-gradient: linear-gradient(90deg, #00b86b 0%, #22c7a3 100%);
+
+  /* Chart series */
+  --gc-chart-1: #00b86b;
+  --gc-chart-2: #22c7a3;
+  --gc-chart-3: #7ad9b3;
+  --gc-chart-4: #f79009;
+  --gc-chart-5: #f04438;
+
+  /* Align shadcn / theme.css tokens */
+  --background: var(--gc-bg);
+  --foreground: var(--gc-text);
+  --card: var(--gc-card);
+  --card-foreground: var(--gc-text);
+  --popover: var(--gc-card);
+  --popover-foreground: var(--gc-text);
+  --primary: var(--gc-primary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--gc-soft);
+  --secondary-foreground: var(--gc-primary);
+  --muted: var(--gc-soft-2);
+  --muted-foreground: var(--gc-text-muted);
+  --accent: var(--gc-soft);
+  --accent-foreground: var(--gc-primary);
+  --border: var(--gc-border);
+  --input-background: var(--gc-card);
+  --ring: var(--gc-primary);
+  --chart-1: var(--gc-chart-1);
+  --chart-2: var(--gc-chart-2);
+  --chart-3: var(--gc-chart-3);
+  --chart-4: var(--gc-chart-4);
+  --chart-5: var(--gc-chart-5);
+  --sidebar: var(--gc-card);
+  --sidebar-foreground: var(--gc-text-body);
+  --sidebar-primary: var(--gc-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--gc-soft);
+  --sidebar-accent-foreground: var(--gc-primary-selected-text);
+  --sidebar-border: var(--gc-border);
+  --sidebar-ring: var(--gc-secondary);
+
+  /* Remap legacy shell / agent tokens → green */
+  --agent-copilot-surface: var(--gc-bg);
+  --agent-copilot-video-blue-deep: var(--gc-module);
+  --agent-copilot-video-blue-mid: var(--gc-soft-2);
+  --agent-copilot-video-blue-glow: rgba(0, 184, 107, 0.12);
+
+  --shell-bg: var(--gc-bg);
+  --shell-text: var(--gc-text);
+  --shell-text-muted: var(--gc-text-muted);
+  --shell-accent: var(--gc-primary);
+  --shell-card-bg: var(--gc-card);
+  --shell-card-border: var(--gc-border);
+  --shell-input-bg: var(--gc-card);
+  --shell-radius: var(--gc-radius);
+  --shell-font: var(--gc-font);
+}
+
+/* ── Shared card / button primitives ── */
+.gc-card {
+  background: var(--gc-card);
+  border: 1px solid var(--gc-border);
+  border-radius: var(--gc-radius);
+  box-shadow: var(--gc-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.gc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--gc-shadow-hover);
+  border-color: var(--gc-border-strong);
+}
+
+.gc-btn-primary {
+  background: var(--gc-primary);
+  color: #fff;
+  border: 1px solid var(--gc-primary);
+  border-radius: var(--gc-radius-sm);
+}
+
+.gc-btn-primary:hover {
+  background: var(--gc-primary-hover);
+}
+
+.gc-btn-secondary {
+  background: #fff;
+  color: var(--gc-primary-hover);
+  border: 1px solid var(--gc-primary);
+  border-radius: var(--gc-radius-sm);
+}
+
+.gc-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--gc-soft);
+  color: var(--gc-primary);
+  border: 1px solid var(--gc-border);
+  font-size: 12px;
+}
+
+.gc-title-gradient {
+  background: var(--gc-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

@@ -1,0 +1,1821 @@
+/**
+ * 统一问答详情 Shell 白绿皮肤（cta-shell / pp-shell / 生态·发改委对话壳）
+ * 仅改视觉，不改布局结构与交互逻辑。
+ * 由 apply-green-theme 注入到问答详情 HTML。
+ */
+
+:root {
+  --pp-text-primary: #101828;
+  --pp-text-muted: #98a2b3;
+  --pp-text: #101828;
+  --pp-muted: #98a2b3;
+  --cta-text-primary: #101828;
+  --cta-text-secondary: #475467;
+  --cta-text-muted: #98a2b3;
+}
+
+/* ── 壳层底：浅薄荷绿（勿用纯白 / 近纯白） ── */
+.cta-shell,
+.pp-shell,
+.carbon-target-shell,
+.carbon-trading-shell,
+.benchmark-shell,
+.supply-chain-shell,
+.agent-detail,
+.agent-chat-layout {
+  background: var(--gc-bg, #eef6f1) !important;
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.cta-body,
+.pp-layout {
+  background: transparent !important;
+}
+
+/* ── 左侧栏 ── */
+.cta-history,
+.pp-sidebar,
+.cta-sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid var(--gc-border, #d8ece2) !important;
+  box-shadow: 4px 0 24px rgba(16, 24, 40, 0.04) !important;
+  background-image: none !important;
+}
+
+.cta-history__back,
+.cta-sidebar__back,
+.pp-sidebar__back,
+.cta-back-btn,
+.cta-back {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f8f4 100%) !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+}
+
+.cta-history__back:hover,
+.cta-sidebar__back:hover,
+.pp-sidebar__back:hover,
+.cta-back-btn:hover,
+.cta-back:hover {
+  border-color: var(--gc-primary, #00b86b) !important;
+  color: var(--gc-primary, #00b86b) !important;
+}
+
+.cta-history__title,
+.cta-sidebar__title,
+.pp-sidebar__title,
+.cta-brand-title,
+.cta-history__brand-title {
+  color: var(--gc-text, #101828) !important;
+  text-shadow: none !important;
+  background: none !important;
+  -webkit-text-fill-color: unset !important;
+}
+
+.cta-history__desc,
+.pp-sidebar__desc,
+.cta-sidebar__desc,
+.cta-history__brand-desc {
+  color: var(--gc-text-muted, #98a2b3) !important;
+}
+
+.cta-history__new,
+.cta-sidebar__new,
+.pp-sidebar__new,
+#cta-new-chat,
+#pp-new-chat {
+  background: rgba(0, 184, 107, 0.08) !important;
+  border: 1px solid rgba(0, 184, 107, 0.28) !important;
+  color: var(--gc-primary, #00b86b) !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+.cta-history__new:hover,
+.pp-sidebar__new:hover,
+#cta-new-chat:hover,
+#pp-new-chat:hover {
+  background: rgba(0, 184, 107, 0.14) !important;
+  border-color: var(--gc-primary, #00b86b) !important;
+}
+
+.cta-history__item,
+.pp-sidebar__list li,
+.pp-history-item,
+.pp-history__item,
+.cta-session-item {
+  background: transparent !important;
+  background-image: none !important;
+  color: var(--gc-text-body, #475467) !important;
+  border-color: transparent !important;
+}
+
+.cta-history__item:hover,
+.pp-history-item:hover,
+.pp-history__item:hover,
+.cta-session-item:hover {
+  background: #f4f6f8 !important;
+}
+
+.cta-history__item.is-active,
+.pp-history-item.is-active,
+.pp-history__item:has(.pp-history__btn.is-active),
+.cta-session-item.is-active,
+.pp-sidebar__list li.is-active {
+  background: var(--gc-soft, #ddf8eb) !important;
+  color: var(--gc-primary-selected-text, #00a866) !important;
+}
+
+.cta-history__label,
+.pp-sidebar__label,
+.cta-section-label {
+  color: var(--gc-text-muted, #98a2b3) !important;
+}
+
+.cta-history-expand,
+.cta-history-toggle,
+.pp-topbar__menu {
+  background: #ffffff !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text-body, #475467) !important;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06) !important;
+}
+
+.cta-history-expand:hover,
+.cta-history-toggle:hover,
+.pp-topbar__menu:hover {
+  border-color: var(--gc-primary, #00b86b) !important;
+  color: var(--gc-primary, #00b86b) !important;
+  background: var(--gc-soft, #ddf8eb) !important;
+}
+
+/* ── 主区铺浅薄荷底（勿用纯白盖住 --gc-bg） ── */
+.cta-main,
+.pp-main,
+.cta-main__scroll,
+.pp-main__scroll {
+  background: var(--gc-bg, #eef6f1) !important;
+  background-image: none !important;
+}
+
+.cta-main__bg,
+.pp-main__bg {
+  background: transparent !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+.cta-main__bg-glow,
+.pp-main__bg-glow,
+.cta-main__bg-grid,
+.pp-main__bg-grid,
+.cta-main__bg-scan {
+  opacity: 0.14 !important;
+  filter: hue-rotate(85deg) saturate(0.45) !important;
+}
+
+.cta-main__scroll-top-fade,
+.pp-main__scroll-top-fade {
+  background: linear-gradient(
+    180deg,
+    #f5faf7 0%,
+    rgba(245, 250, 247, 0.92) 35%,
+    rgba(245, 250, 247, 0.4) 70%,
+    transparent 100%
+  ) !important;
+}
+
+/* ── 欢迎区：透出页面薄荷底，不做纯白大卡片 ── */
+.cta-welcome,
+.pp-welcome,
+.cta-welcome__panel {
+  color: var(--gc-text-body, #475467) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+.cta-welcome__headline,
+.pp-welcome__title,
+.cta-welcome__greeting,
+.pp-welcome__greeting {
+  color: var(--gc-text, #101828) !important;
+  text-shadow: none !important;
+  background: none !important;
+  background-image: none !important;
+  -webkit-text-fill-color: var(--gc-text, #101828) !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+}
+
+.cta-welcome__accent,
+.cta-welcome__headline .accent,
+.pp-welcome__accent,
+.cta-welcome__greeting .accent {
+  background: none !important;
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  color: var(--gc-primary, #00b86b) !important;
+  -webkit-text-fill-color: var(--gc-primary, #00b86b) !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+.cta-welcome__desc,
+.pp-welcome__desc,
+.cta-welcome__subtitle {
+  color: var(--gc-text-body, #475467) !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+.cta-avatar-ring,
+.cta-welcome__avatar-ring,
+.cta-welcome__ring,
+.pp-welcome__avatar-ring,
+.pp-welcome__ring {
+  box-shadow:
+    0 0 0 3px rgba(0, 184, 107, 0.2),
+    0 0 24px rgba(0, 184, 107, 0.18) !important;
+  border-color: rgba(0, 184, 107, 0.35) !important;
+}
+
+.pp-related__item {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.pp-related__item:hover {
+  border-color: rgba(0, 184, 107, 0.45) !important;
+  background: var(--gc-soft, #ddf8eb) !important;
+}
+
+/* ── 气泡 ── */
+.cta-msg.is-assistant .cta-msg__bubble,
+.pp-msg.is-assistant .pp-msg__bubble,
+.pp-msg--assistant .pp-msg__bubble,
+.cta-bubble--assistant {
+  background: #ffffff !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+  box-shadow: 0 2px 12px rgba(0, 184, 107, 0.06) !important;
+  backdrop-filter: none !important;
+  background-image: none !important;
+}
+
+.cta-msg.is-user .cta-msg__bubble,
+.pp-msg.is-user .pp-msg__bubble,
+.pp-msg--user .pp-msg__bubble,
+.cta-bubble--user {
+  background: linear-gradient(135deg, rgba(0, 184, 107, 0.12), rgba(34, 199, 163, 0.1)) !important;
+  border: 1px solid rgba(0, 184, 107, 0.28) !important;
+  color: var(--gc-text, #101828) !important;
+  backdrop-filter: none !important;
+}
+
+.pp-msg--user .pp-msg__body {
+  color: var(--gc-text, #101828) !important;
+}
+
+/* ── 输入区：cta-input-bar + agent-copilot-input（真实类名） ── */
+.cta-input-bar,
+.pp-input-bar,
+.pp-input-area,
+.cta-input-box,
+.pp-input-box,
+.agent-input-wrap {
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.agent-copilot-input,
+.cta-input-box .agent-copilot-input,
+.pp-input-box {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 184, 107, 0.35) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 4px 24px rgba(0, 184, 107, 0.1),
+    0 0 0 3px rgba(0, 184, 107, 0.08) !important;
+  background-image: none !important;
+}
+
+.agent-copilot-input:focus-within,
+.pp-input-box:focus-within,
+.cta-input-box:focus-within {
+  border-color: var(--gc-primary, #00b86b) !important;
+  box-shadow:
+    0 6px 28px rgba(0, 184, 107, 0.14),
+    0 0 0 3px rgba(0, 184, 107, 0.14) !important;
+}
+
+.agent-copilot-input textarea,
+.pp-input-box textarea,
+.cta-input-box textarea,
+#cta-input,
+#pp-input {
+  background: transparent !important;
+  color: var(--gc-text, #101828) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.agent-copilot-input textarea::placeholder,
+.pp-input-box textarea::placeholder {
+  color: var(--gc-text-muted, #98a2b3) !important;
+}
+
+.cta-tool-btn,
+.pp-tool-btn,
+.cta-input-tools button,
+.agent-copilot-input__tool-btn,
+.cta-input-chip {
+  color: var(--gc-text-body, #475467) !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.cta-tool-btn:hover,
+.pp-tool-btn:hover,
+.agent-copilot-input__tool-btn:hover,
+.cta-input-chip:hover {
+  border-color: var(--gc-primary, #00b86b) !important;
+  color: var(--gc-primary, #00b86b) !important;
+  background: var(--gc-soft, #ddf8eb) !important;
+}
+
+.cta-input-chip.is-active,
+.cta-input-chip[aria-pressed="true"] {
+  background: var(--gc-soft, #ddf8eb) !important;
+  border-color: rgba(0, 184, 107, 0.4) !important;
+  color: var(--gc-primary, #00b86b) !important;
+}
+
+#cta-send,
+#pp-send,
+.cta-send,
+.pp-send {
+  background: var(--gc-primary, #00b86b) !important;
+  border-color: var(--gc-primary, #00b86b) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(0, 184, 107, 0.28) !important;
+}
+
+#cta-send:hover,
+#pp-send:hover,
+.cta-send:hover,
+.pp-send:hover {
+  background: var(--gc-primary-hover, #00995a) !important;
+}
+
+/* ── 快捷问题 / 场景卡 / ESG quick ── */
+.cta-faq__item,
+.cta-scenario,
+.pp-faq__item,
+.pp-scenario,
+.cta-quick-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+  box-shadow: 0 2px 10px rgba(0, 184, 107, 0.05) !important;
+}
+
+.cta-faq__item:hover,
+.cta-scenario:hover,
+.pp-faq__item:hover,
+.cta-quick-card:hover {
+  border-color: rgba(0, 184, 107, 0.45) !important;
+  box-shadow: 0 6px 18px rgba(0, 184, 107, 0.12) !important;
+}
+
+.cta-questions-section-title,
+.cta-faq__title {
+  color: var(--gc-text, #101828) !important;
+}
+
+.cta-quick-card__icon,
+.cta-quick-card .icon-panel {
+  background: var(--gc-soft, #ddf8eb) !important;
+  color: var(--gc-primary, #00b86b) !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+}
+
+/* ── 思考态：去蓝紫 ── */
+.cta-thinking,
+.cta-thinking-step,
+.ai-thinking,
+.ai-thinking-para,
+.thinking-block,
+[class*="thinking"] {
+  border-color: rgba(0, 184, 107, 0.25) !important;
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.ai-thinking-para,
+.cta-thinking__text {
+  color: var(--gc-text-body, #475467) !important;
+}
+
+/* ── 生态 / 发改委 iframe 内 agent 对话壳 ── */
+.agent-detail,
+.agent-detail-layout,
+.agent-chat,
+.agent-chat-layout,
+.agent-home-layout .agent-chat,
+.lc-shell.agent-mode,
+.carbon-agent-shell,
+.agent-stars {
+  background: var(--gc-bg, #f5faf7) !important;
+  color: var(--gc-text-body, #475467) !important;
+  background-image: none !important;
+}
+
+.agent-stars main {
+  background: var(--gc-bg, #f5faf7) !important;
+  background-image: none !important;
+  color: var(--gc-text-body, #475467) !important;
+}
+
+/* 生态 SPA 真实类名（仅 agent 壳，不碰 cockpit） */
+.agent-portal-layout,
+.agent-detail-view,
+.agent-chat-panel,
+.agent-messages-area,
+.agent-detail-main {
+  background: var(--gc-bg, #f5faf7) !important;
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.agent-portal-layout {
+  color: var(--gc-text, #101828) !important;
+}
+
+.agent-portal-layout .agent-detail-back,
+.agent-portal-layout .agent-cap-expand-btn,
+.agent-detail-view .agent-detail-back,
+.agent-detail-view .agent-cap-expand-btn {
+  background: #ffffff !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+}
+
+.agent-portal-layout .agent-detail-back:hover,
+.agent-portal-layout .agent-cap-expand-btn:hover,
+.agent-detail-view .agent-detail-back:hover,
+.agent-detail-view .agent-cap-expand-btn:hover {
+  border-color: var(--gc-primary, #00b86b) !important;
+  color: var(--gc-primary, #00b86b) !important;
+  background: var(--gc-soft, #ddf8eb) !important;
+}
+
+.agent-portal-layout .agent-cap-card,
+.agent-detail-view .agent-cap-card {
+  background: #ffffff !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+/* 生态：白字标题 / 冰蓝 muted → 深色 */
+.agent-portal-layout .agent-cap-card-title,
+.agent-portal-layout .agent-cap-card-desc,
+.agent-portal-layout .agent-brand-title,
+.agent-portal-layout .agent-user-name,
+.agent-portal-layout .agent-welcome h1,
+.agent-portal-layout .agent-result-title,
+.agent-portal-layout .agent-float-value,
+.agent-portal-layout .agent-cap-fullscreen-header h2,
+.agent-detail-view .agent-cap-card-title,
+.agent-detail-view .agent-welcome h1,
+.agent-detail-view .agent-result-title {
+  color: var(--gc-text, #101828) !important;
+  -webkit-text-fill-color: var(--gc-text, #101828) !important;
+}
+
+.agent-portal-layout .agent-cap-card-desc {
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.agent-portal-layout .agent-brand-back,
+.agent-portal-layout .agent-service-item,
+.agent-portal-layout .agent-history-item,
+.agent-portal-layout .agent-history-title,
+.agent-portal-layout .agent-history-meta,
+.agent-portal-layout .agent-logout-btn,
+.agent-portal-layout .agent-sidebar [class*="muted"],
+.agent-portal-layout .agent-sidebar .text-muted {
+  color: var(--gc-text-muted, #98a2b3) !important;
+}
+
+.agent-portal-layout .agent-service-item,
+.agent-portal-layout .agent-history-item {
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.agent-portal-layout .agent-input-box textarea,
+.agent-portal-layout .agent-input-box input,
+.agent-detail-view .agent-input-box textarea {
+  color: var(--gc-text, #101828) !important;
+  background: #ffffff !important;
+}
+
+.agent-portal-layout .agent-cap-card:hover {
+  border-color: rgba(0, 184, 107, 0.45) !important;
+  box-shadow: 0 8px 24px rgba(0, 184, 107, 0.12) !important;
+}
+
+/* 全域综合研判等：相关问题 / 追问 / 快捷卡 */
+.agent-detail-view .agent-suggest-btns,
+.agent-detail-view .agent-follow-ups,
+.agent-detail-view .agent-candidate-cards,
+.agent-chat-panel .agent-suggest-btns,
+.agent-chat-panel .agent-follow-ups,
+.agent-portal-layout .agent-suggest-btns,
+.agent-portal-layout .agent-follow-ups {
+  gap: 8px !important;
+}
+
+.agent-detail-view .agent-suggest-btn,
+.agent-detail-view .agent-candidate-btn,
+.agent-detail-view .agent-example-btn,
+.agent-detail-view .agent-follow-btn,
+.agent-chat-panel .agent-suggest-btn,
+.agent-chat-panel .agent-candidate-btn,
+.agent-chat-panel .agent-example-btn,
+.agent-chat-panel .agent-follow-btn,
+.agent-portal-layout .agent-suggest-btn,
+.agent-portal-layout .agent-follow-btn {
+  color: var(--gc-text, #101828) !important;
+  -webkit-text-fill-color: var(--gc-text, #101828) !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  box-shadow: 0 1px 4px rgba(0, 184, 107, 0.06) !important;
+}
+
+.agent-detail-view .agent-suggest-btn:hover,
+.agent-detail-view .agent-candidate-btn:hover,
+.agent-detail-view .agent-example-btn:hover,
+.agent-detail-view .agent-follow-btn:hover,
+.agent-chat-panel .agent-suggest-btn:hover,
+.agent-chat-panel .agent-follow-btn:hover,
+.agent-portal-layout .agent-suggest-btn:hover,
+.agent-portal-layout .agent-follow-btn:hover {
+  color: var(--gc-primary, #00b86b) !important;
+  -webkit-text-fill-color: var(--gc-primary, #00b86b) !important;
+  background: var(--gc-soft, #ddf8eb) !important;
+  border-color: rgba(0, 184, 107, 0.45) !important;
+}
+
+.agent-detail-view .agent-follow-btn,
+.agent-chat-panel .agent-follow-btn {
+  border-style: dashed !important;
+  border-color: rgba(0, 184, 107, 0.4) !important;
+  color: var(--gc-text-body, #475467) !important;
+  -webkit-text-fill-color: var(--gc-text-body, #475467) !important;
+  background: transparent !important;
+}
+
+.agent-detail-view .agent-quick-card,
+.agent-portal-layout .agent-quick-card,
+.agent-chat-panel .agent-quick-card {
+  color: var(--gc-text, #101828) !important;
+  -webkit-text-fill-color: var(--gc-text, #101828) !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 2px 10px rgba(0, 184, 107, 0.06) !important;
+}
+
+.agent-detail-view .agent-quick-card:hover,
+.agent-portal-layout .agent-quick-card:hover {
+  border-color: rgba(0, 184, 107, 0.45) !important;
+  background: var(--gc-soft, #ddf8eb) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.agent-detail-view .ai-suggest-list li,
+.agent-chat-panel .ai-suggest-list li,
+.agent-portal-layout .ai-suggest-list li {
+  color: var(--gc-text-body, #475467) !important;
+  border-bottom-color: rgba(0, 184, 107, 0.2) !important;
+}
+
+.agent-detail-view .agent-tag-info,
+.agent-chat-panel .agent-tag-info {
+  color: var(--gc-primary, #00b86b) !important;
+  background: rgba(0, 184, 107, 0.12) !important;
+}
+
+.agent-detail-view .agent-msg-bubble,
+.agent-chat-panel .agent-msg-bubble {
+  background: #ffffff !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.agent-detail-view .agent-msg-user .agent-msg-bubble,
+.agent-chat-panel .agent-msg-user .agent-msg-bubble {
+  background: rgba(0, 184, 107, 0.1) !important;
+  border-color: rgba(0, 184, 107, 0.28) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.agent-detail-view .agent-msg-bubble.guide,
+.agent-chat-panel .agent-msg-bubble.guide {
+  color: #101828 !important;
+  background: #ddf8eb !important;
+  border: 1px solid rgba(0, 184, 107, 0.3) !important;
+}
+
+.agent-detail-view .agent-msg-guide.permission .agent-msg-bubble.guide,
+.agent-chat-panel .agent-msg-guide.permission .agent-msg-bubble.guide,
+.agent-detail-view .agent-msg-bubble.guide.permission,
+.agent-chat-panel .agent-msg-bubble.guide.permission {
+  color: #101828 !important;
+  background: rgba(240, 68, 56, 0.08) !important;
+  border-color: rgba(240, 68, 56, 0.35) !important;
+}
+
+.agent-detail-view .agent-msg-avatar,
+.agent-chat-panel .agent-msg-avatar {
+  background: rgba(0, 184, 107, 0.12) !important;
+  border: 1px solid rgba(0, 184, 107, 0.25) !important;
+}
+
+.ai-thinking-block,
+.agent-detail-view [class*="thinking"] {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 184, 107, 0.25) !important;
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.agent-input-wrap,
+.agent-detail-view .agent-input-wrap {
+  background: transparent !important;
+}
+
+.agent-detail-view textarea,
+.agent-chat-panel textarea {
+  background: #ffffff !important;
+  color: var(--gc-text, #101828) !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+}
+
+/* ═══════════════════════════════════════════
+ * 全域综合研判等详情壳 · 白绿 Design Token 全表
+ * 仅 .agent-detail-view / .agent-chat-panel，不碰 cockpit
+ * ═══════════════════════════════════════════ */
+.agent-detail-view,
+.agent-chat-panel,
+.agent-messages-area {
+  --ai-text-primary: #101828;
+  --ai-text-secondary: #475467;
+  --ai-text-dim: #98a2b3;
+  --ai-border: rgba(0, 184, 107, 0.28);
+  --ai-border-hover: rgba(0, 184, 107, 0.45);
+  --ai-blue: #00b86b;
+  --ai-green: #00b86b;
+  --ai-bg-card: #ffffff;
+  --gov-text-secondary: #475467;
+  background: #f5faf7 !important;
+  color: #475467 !important;
+  background-image: none !important;
+}
+
+.agent-detail-view,
+.agent-chat-panel {
+  color: #101828 !important;
+}
+
+/* 欢迎 / 标题 */
+.agent-detail-view .agent-welcome,
+.agent-chat-panel .agent-welcome,
+.agent-detail-view .agent-welcome h1,
+.agent-chat-panel .agent-welcome h1,
+.agent-detail-view .agent-result-title,
+.agent-chat-panel .agent-result-title,
+.agent-detail-view .agent-float-value,
+.agent-chat-panel .agent-float-value {
+  color: #101828 !important;
+  -webkit-text-fill-color: #101828 !important;
+  background: none !important;
+  background-image: none !important;
+}
+
+.agent-detail-view .agent-welcome-sub,
+.agent-chat-panel .agent-welcome-sub,
+.agent-detail-view .agent-welcome p,
+.agent-chat-panel .agent-welcome p {
+  color: #98a2b3 !important;
+  -webkit-text-fill-color: #98a2b3 !important;
+}
+
+/* 输入条 */
+.agent-detail-view .agent-input-box,
+.agent-chat-panel .agent-input-box {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid #d8ece2 !important;
+  box-shadow: 0 4px 20px rgba(0, 184, 107, 0.08) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.agent-detail-view .agent-input-box:focus-within,
+.agent-chat-panel .agent-input-box:focus-within {
+  border-color: #00b86b !important;
+  box-shadow:
+    0 4px 20px rgba(0, 184, 107, 0.1),
+    0 0 0 3px rgba(0, 184, 107, 0.16) !important;
+}
+
+.agent-detail-view .agent-input-box textarea,
+.agent-detail-view .agent-input-box input,
+.agent-chat-panel .agent-input-box textarea,
+.agent-chat-panel .agent-input-box input {
+  color: #101828 !important;
+  -webkit-text-fill-color: #101828 !important;
+  background: transparent !important;
+  caret-color: #00b86b !important;
+}
+
+.agent-detail-view .agent-input-box textarea::placeholder,
+.agent-chat-panel .agent-input-box textarea::placeholder {
+  color: #98a2b3 !important;
+  -webkit-text-fill-color: #98a2b3 !important;
+}
+
+.agent-detail-view .agent-input-toolbar,
+.agent-chat-panel .agent-input-toolbar {
+  border-top-color: #d8ece2 !important;
+}
+
+.agent-detail-view .agent-mode-select,
+.agent-detail-view .agent-tool-btn,
+.agent-chat-panel .agent-mode-select,
+.agent-chat-panel .agent-tool-btn {
+  color: #475467 !important;
+  -webkit-text-fill-color: #475467 !important;
+  background: transparent !important;
+}
+
+.agent-detail-view .agent-tool-btn:hover,
+.agent-chat-panel .agent-tool-btn:hover {
+  color: #00b86b !important;
+  background: #ddf8eb !important;
+}
+
+.agent-detail-view .agent-tool-btn.active,
+.agent-chat-panel .agent-tool-btn.active {
+  color: #00b86b !important;
+  -webkit-text-fill-color: #00b86b !important;
+  background: #ddf8eb !important;
+  border-color: rgba(0, 184, 107, 0.35) !important;
+}
+
+.agent-detail-view .agent-send-btn,
+.agent-chat-panel .agent-send-btn {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background: #00b86b !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(0, 184, 107, 0.28) !important;
+}
+
+.agent-detail-view .agent-send-btn:hover,
+.agent-chat-panel .agent-send-btn:hover {
+  background: #00995a !important;
+  background-image: none !important;
+}
+
+/* 思考块 */
+.agent-detail-view .ai-thinking,
+.agent-chat-panel .ai-thinking,
+.agent-detail-view .ai-thinking-wrap,
+.agent-chat-panel .ai-thinking-wrap {
+  color: #475467 !important;
+}
+
+.agent-detail-view .ai-thinking-block,
+.agent-chat-panel .ai-thinking-block,
+.agent-detail-view .ai-thinking-block.cockpit,
+.agent-detail-view .ai-thinking-block.compact,
+.agent-detail-view .ai-thinking-block.map,
+.agent-detail-view .ai-thinking-block.chart,
+.agent-chat-panel .ai-thinking-block.cockpit,
+.agent-chat-panel .ai-thinking-block.compact {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 184, 107, 0.25) !important;
+  color: #475467 !important;
+}
+
+.agent-detail-view .ai-thinking-block.light,
+.agent-chat-panel .ai-thinking-block.light {
+  background: #f0f8f4 !important;
+  border-color: #d8ece2 !important;
+}
+
+.agent-detail-view .ai-thinking-para,
+.agent-chat-panel .ai-thinking-para {
+  color: #475467 !important;
+}
+
+.agent-detail-view .ai-thinking-toggle,
+.agent-chat-panel .ai-thinking-toggle,
+.agent-detail-view .ai-thinking-toggle.is-open,
+.agent-chat-panel .ai-thinking-toggle.is-open {
+  color: #475467 !important;
+}
+
+.agent-detail-view .ai-thinking-toggle:hover:not(:disabled),
+.agent-chat-panel .ai-thinking-toggle:hover:not(:disabled) {
+  color: #00b86b !important;
+}
+
+.agent-detail-view .ai-thinking-dot,
+.agent-chat-panel .ai-thinking-dot {
+  background: #00b86b !important;
+}
+
+.agent-detail-view .ai-thinking-arrow,
+.agent-chat-panel .ai-thinking-arrow {
+  color: #00b86b !important;
+}
+
+/* AI 控件 / modal（若详情内弹出） */
+.agent-detail-view .ai-chart-icon-btn,
+.agent-chat-panel .ai-chart-icon-btn,
+.agent-detail-view [class*="ai-agent-btn"],
+.agent-chat-panel [class*="ai-agent-btn"] {
+  color: #00b86b !important;
+  background: rgba(0, 184, 107, 0.12) !important;
+  border-color: rgba(0, 184, 107, 0.28) !important;
+}
+
+.agent-detail-view .ai-chart-icon-btn:hover,
+.agent-chat-panel .ai-chart-icon-btn:hover {
+  background: #ddf8eb !important;
+  border-color: rgba(0, 184, 107, 0.45) !important;
+  box-shadow: 0 0 8px rgba(0, 184, 107, 0.2) !important;
+}
+
+.agent-detail-view .ai-agent-modal,
+.agent-chat-panel .ai-agent-modal,
+.agent-detail-view [class*="ai-agent-modal"],
+.agent-chat-panel [class*="ai-agent-modal"],
+.agent-detail-view .ai-agent-loading-card,
+.agent-chat-panel .ai-agent-loading-card {
+  background: #ffffff !important;
+  border-color: #d8ece2 !important;
+  color: #101828 !important;
+  box-shadow: 0 8px 28px rgba(16, 24, 40, 0.1) !important;
+}
+
+.agent-detail-view .ai-agent-spinner,
+.agent-chat-panel .ai-agent-spinner {
+  border-color: rgba(0, 184, 107, 0.2) !important;
+  border-top-color: #00b86b !important;
+}
+
+/* 结果 / 能力卡标题加固 */
+.agent-detail-view .agent-cap-card-title,
+.agent-detail-view .agent-cap-card-desc,
+.agent-detail-view .agent-cap-fullscreen-header h2,
+.agent-chat-panel .agent-cap-card-title {
+  color: #101828 !important;
+  -webkit-text-fill-color: #101828 !important;
+}
+
+.agent-detail-view .agent-cap-card-desc {
+  color: #475467 !important;
+  -webkit-text-fill-color: #475467 !important;
+}
+
+.agent-detail-view .agent-cap-fullscreen-backdrop {
+  background: rgba(16, 24, 40, 0.35) !important;
+}
+
+.agent-detail-view .agent-cap-fullscreen-panel {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid #d8ece2 !important;
+  color: #101828 !important;
+}
+
+.agent-detail-view .agent-cap-fullscreen-close {
+  color: #101828 !important;
+  background: #f0f8f4 !important;
+  border: 1px solid #d8ece2 !important;
+}
+
+/* 链接强调 */
+.agent-detail-view a,
+.agent-chat-panel a {
+  color: #00b86b !important;
+}
+
+/* ── 相关问答 / 指标卡 / 结果卡 / 思考结论（截图残留深色） ── */
+.agent-detail-view .agent-detail-qa h2,
+.agent-detail-view .agent-detail-hero h1,
+.agent-detail-view .agent-detail-hero h2 {
+  color: #101828 !important;
+  -webkit-text-fill-color: #101828 !important;
+}
+
+.agent-detail-view .agent-detail-hero-desc {
+  color: #98a2b3 !important;
+}
+
+.agent-detail-view .agent-detail-hero-icon {
+  background: #ddf8eb !important;
+  background-image: none !important;
+  border: 1px solid #d8ece2 !important;
+  color: #00b86b !important;
+  box-shadow: none !important;
+}
+
+.agent-detail-view .agent-detail-qa-item {
+  color: #101828 !important;
+  -webkit-text-fill-color: #101828 !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid #d8ece2 !important;
+  box-shadow: 0 1px 4px rgba(0, 184, 107, 0.06) !important;
+}
+
+.agent-detail-view .agent-detail-qa-item:hover {
+  background: #ddf8eb !important;
+  border-color: rgba(0, 184, 107, 0.45) !important;
+  color: #101828 !important;
+}
+
+.agent-detail-view .agent-detail-qa-icon {
+  color: #00b86b !important;
+  -webkit-text-fill-color: #00b86b !important;
+  background: #ddf8eb !important;
+  border: 1px solid rgba(0, 184, 107, 0.35) !important;
+}
+
+.agent-detail-view .agent-metric-grid {
+  gap: 10px !important;
+}
+
+.agent-detail-view .agent-metric-item {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid #d8ece2 !important;
+  box-shadow: 0 2px 10px rgba(0, 184, 107, 0.06) !important;
+}
+
+.agent-detail-view .agent-metric-label {
+  color: #98a2b3 !important;
+}
+
+.agent-detail-view .agent-metric-val {
+  color: #101828 !important;
+}
+
+.agent-detail-view .agent-metric-val.status-ok,
+.agent-detail-view .agent-metric-val.status-good,
+.agent-detail-view .agent-metric-val.status-neutral {
+  color: #00b86b !important;
+}
+
+.agent-detail-view .agent-metric-val.status-warn {
+  color: #f79009 !important;
+}
+
+.agent-detail-view .agent-metric-val.status-bad {
+  color: #f04438 !important;
+}
+
+.agent-detail-view .agent-result-card,
+.agent-detail-view .agent-result-body,
+.agent-chat-panel .agent-result-card {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid #d8ece2 !important;
+  color: #101828 !important;
+  box-shadow: 0 4px 20px rgba(0, 184, 107, 0.08) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.agent-detail-view .agent-result-title {
+  color: #101828 !important;
+  -webkit-text-fill-color: #101828 !important;
+}
+
+.agent-detail-view .agent-result-tag {
+  color: #00b86b !important;
+  background: #ddf8eb !important;
+  border: 1px solid #d8ece2 !important;
+}
+
+.agent-detail-view .agent-result-label {
+  color: #00b86b !important;
+}
+
+.agent-detail-view .agent-result-conclusion p,
+.agent-detail-view .agent-result-body p,
+.agent-detail-view .agent-result-data,
+.agent-detail-view .agent-analysis-block,
+.agent-detail-view .agent-analysis-block ul,
+.agent-detail-view .agent-analysis-block li {
+  color: #475467 !important;
+}
+
+.agent-detail-view .agent-analysis-block h4 {
+  color: #101828 !important;
+}
+
+.agent-detail-view .agent-result-actions {
+  border-top-color: #d8ece2 !important;
+}
+
+.agent-detail-view .agent-action-btn {
+  color: #101828 !important;
+  background: #ffffff !important;
+  border: 1px solid #d8ece2 !important;
+}
+
+.agent-detail-view .agent-action-btn:hover,
+.agent-detail-view .agent-action-btn.primary {
+  color: #ffffff !important;
+  background: #00b86b !important;
+  border-color: #00b86b !important;
+}
+
+.agent-detail-view .agent-action-btn.primary:hover {
+  background: #00995a !important;
+  border-color: #00995a !important;
+}
+
+.agent-detail-view .agent-thinking-loading,
+.agent-detail-view .agent-thinking-toggle,
+.agent-detail-view .agent-thinking-divider {
+  color: #98a2b3 !important;
+}
+
+.agent-detail-view .agent-thinking-line {
+  color: #475467 !important;
+}
+
+.agent-detail-view .agent-thinking-kw {
+  color: #00b86b !important;
+}
+
+.agent-detail-view .agent-thinking-divider {
+  border-top-color: #d8ece2 !important;
+}
+
+.agent-detail-view .agent-thinking-dot {
+  background: #00b86b !important;
+}
+
+.agent-detail-view .agent-tag,
+.agent-detail-view [class*="agent-tag-"] {
+  border-radius: 4px !important;
+}
+
+.agent-detail-view .agent-tag-info {
+  color: #00b86b !important;
+  background: rgba(0, 184, 107, 0.12) !important;
+  border: none !important;
+}
+
+.agent-detail-view .agent-tag-warn {
+  color: #ffffff !important;
+  background: #f79009 !important;
+}
+
+.agent-detail-view .agent-tag-danger {
+  color: #ffffff !important;
+  background: #f04438 !important;
+}
+
+.agent-detail-view .agent-analysis-block li,
+.agent-detail-view .agent-analysis-block li * {
+  color: #475467 !important;
+}
+
+.agent-detail-view .agent-analysis-block li .agent-tag-warn,
+.agent-detail-view .agent-analysis-block li .agent-tag-danger {
+  color: #ffffff !important;
+}
+
+.agent-detail-view .agent-benchmark-table {
+  background: #ffffff !important;
+  border: 1px solid #d8ece2 !important;
+  color: #101828 !important;
+}
+
+.agent-detail-view .agent-benchmark-table th {
+  background: #f0f8f4 !important;
+  color: #98a2b3 !important;
+  border-color: #d8ece2 !important;
+}
+
+.agent-detail-view .agent-benchmark-table td {
+  color: #475467 !important;
+  border-color: #d8ece2 !important;
+}
+
+.agent-detail-view .ai-highlight,
+.agent-detail-view strong.ai-highlight,
+.agent-chat-panel .ai-highlight {
+  color: #00b86b !important;
+  font-weight: 600 !important;
+}
+
+.agent-detail-view .agent-detail-back {
+  color: #101828 !important;
+  background: #ffffff !important;
+  border: 1px solid #d8ece2 !important;
+}
+
+/* 发改委 carbon-agent 根底；排除生态驾驶舱 */
+body.bg-agent-bg:not(:has(.cockpit-full)),
+html:has(body.bg-agent-bg):not(:has(.cockpit-full)),
+body.bg-agent-bg.text-slate-100:not(:has(.cockpit-full)),
+body.text-slate-100:not(:has(.cockpit-full)):not(:has(.shell-body.cockpit-mode)) {
+  background: var(--gc-bg, #f5faf7) !important;
+  color: var(--gc-text-body, #475467) !important;
+}
+
+/* Tailwind slate 面板（发改委 carbon-agent；勿染 cockpit） */
+.agent-stars .bg-slate-800,
+.agent-stars .bg-slate-900,
+.agent-stars .bg-slate-900\/60,
+.agent-stars .bg-slate-900\/75,
+.agent-stars .bg-slate-900\/80,
+.agent-stars [class*="bg-slate-8"],
+.agent-stars [class*="bg-slate-9"],
+body.bg-agent-bg .bg-slate-800,
+body.bg-agent-bg .bg-slate-900,
+body.bg-agent-bg [class*="bg-slate-8"],
+body.bg-agent-bg [class*="bg-slate-9"] {
+  background-color: #ffffff !important;
+  color: var(--gc-text, #101828) !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+}
+
+.agent-stars .text-slate-100,
+.agent-stars .text-slate-200,
+.agent-stars .text-slate-300,
+body.bg-agent-bg .text-slate-100,
+body.bg-agent-bg .text-slate-200,
+body.bg-agent-bg .text-slate-300 {
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.agent-stars .text-slate-50,
+body.bg-agent-bg .text-slate-50 {
+  color: var(--gc-text, #101828) !important;
+}
+
+.agent-sidebar,
+.agent-detail .sidebar,
+.carbon-agent .sidebar {
+  background: #ffffff !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+  border-right-color: var(--gc-border, #d8ece2) !important;
+}
+
+.agent-home-content {
+  border-color: var(--gc-border, #d8ece2) !important;
+}
+
+.agent-msg-assistant,
+.agent-msg--assistant .bubble,
+.chat-msg.assistant .bubble,
+.ai-msg {
+  background: #ffffff !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.agent-msg-user,
+.agent-msg--user .bubble,
+.chat-msg.user .bubble {
+  background: rgba(0, 184, 107, 0.1) !important;
+  border: 1px solid rgba(0, 184, 107, 0.25) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.agent-send-btn,
+.agent-portal-layout button[title="发送"],
+.agent-detail-view button[title="发送"],
+.agent-stars button[title="发送"],
+.cta-shell button[title="发送"],
+.pp-shell button[title="发送"] {
+  background: var(--gc-primary, #00b86b) !important;
+  border-color: var(--gc-primary, #00b86b) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(0, 184, 107, 0.28) !important;
+}
+
+/* 发改委：半透明白字 / 白边 / slate 渐变（限定 agent-stars / bg-agent-bg） */
+.agent-stars [class*="text-white\/"],
+.agent-stars [class*="text-white/"],
+body.bg-agent-bg [class*="text-white\/"],
+body.bg-agent-bg [class*="text-white/"] {
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.btn-primary [class*="text-white"],
+.lc-btn-primary [class*="text-white"],
+.agent-send-btn,
+.agent-send-btn [class*="text-white"],
+button[title="发送"],
+button[title="发送"] [class*="text-white"],
+.agent-copilot-input__send,
+.agent-copilot-input__send [class*="text-white"] {
+  color: #fff !important;
+}
+
+.agent-stars [class*="border-white\/"],
+.agent-stars [class*="border-white/"],
+body.bg-agent-bg [class*="border-white\/"],
+body.bg-agent-bg [class*="border-white/"] {
+  border-color: var(--gc-border, #d8ece2) !important;
+}
+
+.agent-stars .from-slate-500,
+.agent-stars .from-slate-600,
+.agent-stars .from-slate-700,
+.agent-stars .from-slate-800,
+.agent-stars .from-slate-900,
+.agent-stars .to-slate-500,
+.agent-stars .to-slate-600,
+.agent-stars .to-slate-700,
+.agent-stars .to-slate-800,
+.agent-stars .to-slate-900,
+.agent-stars [class*="from-slate-"],
+.agent-stars [class*="to-slate-"],
+body.bg-agent-bg [class*="from-slate-"],
+body.bg-agent-bg [class*="to-slate-"] {
+  --tw-gradient-from: #ddf8eb !important;
+  --tw-gradient-to: #f0f8f4 !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+body.bg-agent-bg .bg-agent-bg,
+.agent-stars .bg-agent-bg,
+body.bg-agent-bg .bg-slate-900\/60,
+body.bg-agent-bg .bg-slate-900\/75,
+body.bg-agent-bg .bg-slate-900\/80 {
+  background-color: #f5faf7 !important;
+  background: #f5faf7 !important;
+}
+
+/* 滚动条 */
+.cta-main__scroll::-webkit-scrollbar-thumb,
+.pp-main::-webkit-scrollbar-thumb,
+.cta-history__list::-webkit-scrollbar-thumb {
+  background: rgba(0, 184, 107, 0.35) !important;
+  border-radius: 999px;
+}
+
+/* ── 下拉 / 浮层兜底 ── */
+.cta-shell [class*="dropdown"],
+.pp-shell [class*="dropdown"],
+.cta-shell [class*="popover"],
+.pp-shell [class*="popover"],
+.cta-mode-menu,
+.cta-followup,
+.pp-followup,
+.cta-input-mode-menu {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+  box-shadow: 0 8px 28px rgba(16, 24, 40, 0.1) !important;
+}
+
+.cta-shell [class*="dropdown"] button,
+.pp-shell [class*="dropdown"] button,
+.cta-mode-menu button {
+  color: var(--gc-text-body, #475467) !important;
+  background: transparent !important;
+}
+
+.cta-shell [class*="dropdown"] button:hover,
+.pp-shell [class*="dropdown"] button:hover {
+  background: var(--gc-soft, #ddf8eb) !important;
+  color: var(--gc-primary, #00b86b) !important;
+}
+
+/* ── 交易壳冰蓝光清零 ── */
+.carbon-trading-shell .agent-copilot-input,
+.carbon-trading-shell .cta-input-bar .agent-copilot-input {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 184, 107, 0.35) !important;
+  box-shadow:
+    0 4px 24px rgba(0, 184, 107, 0.1),
+    0 0 0 3px rgba(0, 184, 107, 0.08) !important;
+}
+
+.carbon-trading-shell .agent-copilot-input:focus-within {
+  border-color: var(--gc-primary, #00b86b) !important;
+  box-shadow:
+    0 6px 28px rgba(0, 184, 107, 0.14),
+    0 0 0 3px rgba(0, 184, 107, 0.14) !important;
+}
+
+.carbon-trading-shell .cta-faq__item,
+.carbon-trading-shell .cta-quick-card {
+  color: var(--gc-text, #101828) !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+}
+
+/* ── ESG / 快捷卡文字强制深色 ── */
+.cta-quick-card,
+.cta-quick-card *,
+.esg-report-agent .cta-quick-card,
+.cta-questions-section-title {
+  color: var(--gc-text, #101828) !important;
+}
+
+.cta-quick-card .muted,
+.cta-quick-card__desc {
+  color: var(--gc-text-body, #475467) !important;
+}
+
+/* ── 链接 / 强调去冰蓝 ── */
+.cta-msg a,
+.pp-msg a,
+.cta-msg__bubble a,
+.pp-msg__bubble a,
+.cta-shell a.text-accent,
+.cta-shell .link-accent {
+  color: var(--gc-primary, #00b86b) !important;
+}
+
+.cta-history__brand-title,
+.pp-sidebar__title {
+  background: none !important;
+  color: var(--gc-text, #101828) !important;
+  -webkit-text-fill-color: unset !important;
+}
+
+/* pp token 兜底 */
+.pp-shell {
+  --pp-text-primary: #101828 !important;
+  --pp-text-muted: #98a2b3 !important;
+}
+
+/* ── 企业壳 overlay / 交易 send / portal chip ── */
+.cta-shell .cta-modal,
+.cta-shell .cta-overlay,
+.cta-shell [class*="overlay"],
+.pp-shell [class*="overlay"],
+.cta-shell [class*="modal-backdrop"] {
+  background: rgba(16, 24, 40, 0.35) !important;
+}
+
+.cta-shell .cta-modal__panel,
+.cta-shell [class*="modal"] .panel,
+.pp-shell [class*="modal"] {
+  background: #ffffff !important;
+  color: var(--gc-text, #101828) !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+}
+
+.agent-copilot-input__send,
+.carbon-trading-shell .agent-copilot-input__send,
+.cta-shell .agent-copilot-input button[type="submit"] {
+  background: var(--gc-primary, #00b86b) !important;
+  border-color: var(--gc-primary, #00b86b) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(0, 184, 107, 0.28) !important;
+}
+
+.pp-sidebar__chip,
+.pp-chip,
+.cta-history__chip {
+  background: var(--gc-soft, #ddf8eb) !important;
+  color: var(--gc-primary, #00b86b) !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+}
+
+.cta-main__bg,
+.carbon-trading-shell .cta-main__bg {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* 标题/徽章残留蓝绿渐变 → 纯绿 */
+.cta-shell [class*="badge"],
+.cta-shell [class*="chip"],
+.pp-shell [class*="chip"],
+.agent-copilot-input__send,
+.carbon-trading-shell [class*="send"] {
+  background-image: none !important;
+}
+
+.cta-shell .cta-hero__title,
+.cta-shell h1,
+.pp-shell .pp-welcome__title {
+  background-image: none !important;
+  color: var(--gc-text, #101828) !important;
+  -webkit-text-fill-color: var(--gc-text, #101828) !important;
+}
+
+/* ── Pass2：企业 voice / 冰蓝 muted / 深蓝玻璃 / specialty ── */
+.cta-shell,
+.pp-shell {
+  --cta-text-muted: #98a2b3 !important;
+}
+
+.cta-sidebar__title,
+.pp-sidebar__title,
+.cta-history__brand-title {
+  background: none !important;
+  background-image: none !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  color: var(--gc-text, #101828) !important;
+  -webkit-text-fill-color: var(--gc-text, #101828) !important;
+}
+
+.cta-welcome__accent,
+.pp-welcome__accent {
+  background: none !important;
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  color: var(--gc-primary, #00b86b) !important;
+  -webkit-text-fill-color: var(--gc-primary, #00b86b) !important;
+}
+
+.voice-recorder-status__timer,
+.voice-recorder-btn--recording,
+.voice-recorder-status__waves span {
+  color: var(--gc-primary, #00b86b) !important;
+}
+
+.voice-recorder-status__waves span {
+  background: var(--gc-primary, #00b86b) !important;
+}
+
+.voice-recorder-status__text {
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.cta-thinking__text,
+.cta-thinking__step,
+.cta-mini-table td,
+.cta-table td,
+.cta-faq__item,
+.cta-scenario__arrow,
+.cta-faq__arrow,
+.pp-think-step,
+.pp-table td,
+.cta-shell .cta-sidebar__desc,
+.pp-shell .pp-sidebar__desc {
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.cta-step-preview,
+.cta-mini-table {
+  background: #ffffff !important;
+  color: var(--gc-text, #101828) !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+  background-image: none !important;
+}
+
+.cta-mini-table th {
+  background: #f0f8f4 !important;
+  color: var(--gc-text-muted, #98a2b3) !important;
+}
+
+.cta-report-modal__backdrop,
+.cta-history-backdrop,
+.pp-shell [class*="backdrop"] {
+  background: rgba(16, 24, 40, 0.35) !important;
+}
+
+.agent-copilot-input__send--ready,
+.agent-copilot-input__send--ready:hover,
+.carbon-trading-shell .agent-copilot-input__send--ready,
+.carbon-trading-shell .agent-copilot-input__send--ready:hover {
+  background: var(--gc-primary, #00b86b) !important;
+  background-image: none !important;
+  border-color: var(--gc-primary, #00b86b) !important;
+  color: #fff !important;
+}
+
+.carbon-trading-shell .agent-copilot-input__tool-btn {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.carbon-trading-shell .cta-faq__item:hover,
+.carbon-trading-shell .cta-quick-btn:hover {
+  background: var(--gc-soft, #ddf8eb) !important;
+  color: var(--gc-primary, #00b86b) !important;
+}
+
+.cta-quick-card__icon,
+.esg-report-agent .cta-quick-card__icon {
+  background: var(--gc-soft, #ddf8eb) !important;
+  background-image: none !important;
+  color: var(--gc-primary, #00b86b) !important;
+  box-shadow: none !important;
+}
+
+.supply-chain-shell [class*="card"],
+.cta-retrofit-card,
+.cta-offline__panel,
+.cta-offline__layers .audit-layer,
+.cta-risk-card,
+[class*="cta-risk"],
+[class*="cta-offline"] {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: var(--gc-text, #101828) !important;
+  border-color: var(--gc-border, #d8ece2) !important;
+}
+
+.benchmark-shell [class*="panel"],
+.benchmark-shell [class*="overlay"],
+.auth-modal [class*="btn"],
+.auth-modal [class*="primary"] {
+  background-image: none !important;
+}
+
+.benchmark-shell [class*="panel"] {
+  background: #ffffff !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.auth-modal [class*="primary"],
+.auth-modal .btn-primary {
+  background: var(--gc-primary, #00b86b) !important;
+  color: #fff !important;
+}
+
+/* ── 综合交易：核心场景 FAQ 条 + 底部场景快捷钮（盖住深蓝科技风残留） ── */
+.cta-shell .cta-faq__item,
+.cta-shell .cta-faq__item:hover,
+.carbon-trading-shell .cta-faq__item,
+.carbon-trading-shell .cta-faq__item:hover {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  box-shadow: 0 2px 10px rgba(0, 184, 107, 0.05) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.cta-shell .cta-faq__item:hover,
+.carbon-trading-shell .cta-faq__item:hover {
+  background: var(--gc-soft, #ddf8eb) !important;
+  border-color: rgba(0, 184, 107, 0.45) !important;
+  box-shadow: 0 6px 18px rgba(0, 184, 107, 0.12) !important;
+}
+
+.cta-shell .cta-faq__text,
+.cta-shell .cta-faq__item .cta-faq__text,
+.cta-shell .cta-faq__item:hover .cta-faq__text,
+.carbon-trading-shell .cta-faq__text,
+.carbon-trading-shell .cta-faq__item .cta-faq__text,
+.carbon-trading-shell .cta-faq__item:hover .cta-faq__text {
+  color: var(--gc-text, #101828) !important;
+}
+
+.cta-shell .cta-faq__arrow,
+.cta-shell .cta-faq__item:hover .cta-faq__arrow,
+.carbon-trading-shell .cta-faq__arrow,
+.carbon-trading-shell .cta-faq__item:hover .cta-faq__arrow {
+  color: var(--gc-primary, #00b86b) !important;
+}
+
+.cta-shell .cta-scene-back,
+.carbon-trading-shell .cta-scene-back {
+  background: #ffffff !important;
+  border: 1px dashed var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.cta-shell .cta-scene-back:hover,
+.carbon-trading-shell .cta-scene-back:hover {
+  border-color: var(--gc-primary, #00b86b) !important;
+  color: var(--gc-primary, #00b86b) !important;
+  background: var(--gc-soft, #ddf8eb) !important;
+}
+
+.cta-shell .cta-quick-btn,
+.cta-shell .cta-quick-btn--scene,
+.cta-shell .cta-quick-btn--back,
+.carbon-trading-shell .cta-quick-btn,
+.carbon-trading-shell .cta-quick-btn--scene,
+.carbon-trading-shell .cta-quick-btn--back {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+  box-shadow: 0 2px 10px rgba(0, 184, 107, 0.05) !important;
+}
+
+.cta-shell .cta-quick-btn--scene,
+.carbon-trading-shell .cta-quick-btn--scene {
+  background: linear-gradient(180deg, #ffffff 0%, #f0f8f4 100%) !important;
+  border-color: rgba(0, 184, 107, 0.35) !important;
+  color: var(--gc-text, #101828) !important;
+  font-weight: 600;
+}
+
+.cta-shell .cta-quick-btn--back,
+.carbon-trading-shell .cta-quick-btn--back {
+  border-style: dashed !important;
+  color: var(--gc-text-body, #475467) !important;
+}
+
+.cta-shell .cta-quick-btn:hover,
+.cta-shell .cta-quick-btn--scene:hover,
+.cta-shell .cta-quick-btn--back:hover,
+.carbon-trading-shell .cta-quick-btn:hover,
+.carbon-trading-shell .cta-quick-btn--scene:hover,
+.carbon-trading-shell .cta-quick-btn--back:hover {
+  background: var(--gc-soft, #ddf8eb) !important;
+  background-image: none !important;
+  border-color: rgba(0, 184, 107, 0.5) !important;
+  color: var(--gc-primary, #00b86b) !important;
+  box-shadow: 0 6px 18px rgba(0, 184, 107, 0.12) !important;
+}
+
+.cta-shell .cta-quick-btn__icon,
+.cta-shell .cta-quick-btn:hover .cta-quick-btn__icon,
+.carbon-trading-shell .cta-quick-btn__icon,
+.carbon-trading-shell .cta-quick-btn:hover .cta-quick-btn__icon {
+  color: var(--gc-primary, #00b86b) !important;
+  opacity: 1 !important;
+}
+
+/* 欢迎引导 / 碳资产条 / 输入框统一宽度 */
+.cta-shell,
+.carbon-trading-shell {
+  --cta-pane-max: 920px;
+}
+.cta-shell .cta-welcome,
+.cta-shell .cta-onboard,
+.cta-shell .cta-mass-kb,
+.cta-shell .cta-input-bar,
+.carbon-trading-shell .cta-welcome,
+.carbon-trading-shell .cta-onboard,
+.carbon-trading-shell .cta-mass-kb,
+.carbon-trading-shell .cta-input-bar {
+  max-width: var(--cta-pane-max, 920px) !important;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* 主区 / 欢迎区强制薄荷绿，覆盖业务 CSS 里可能写死的 #fff */
+.cta-shell .cta-main,
+.cta-shell .cta-main__scroll,
+.cta-shell .cta-welcome,
+.cta-shell .cta-welcome__panel,
+.cta-shell .cta-input-bar,
+.carbon-trading-shell .cta-main,
+.carbon-trading-shell .cta-welcome {
+  background: var(--gc-bg, #eef6f1) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.cta-shell .cta-welcome,
+.cta-shell .cta-welcome__panel {
+  border: none !important;
+}
+
+/* ── 数据对标等：常见问法 + 快速开始（盖住深蓝科技风残留） ── */
+.cta-shell .cta-welcome__line,
+.cta-shell .cta-welcome__section-title,
+.cta-shell .cta-quick-start__label {
+  color: var(--gc-text, #101828) !important;
+  text-shadow: none !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--gc-text, #101828) !important;
+}
+
+.cta-shell .cta-welcome__section-hint,
+.cta-shell .cta-quick-start__hint {
+  color: var(--gc-text-muted, #98a2b3) !important;
+}
+
+.cta-shell .cta-welcome__section--primary .cta-welcome__section-title {
+  color: var(--gc-primary, #00b86b) !important;
+  -webkit-text-fill-color: var(--gc-primary, #00b86b) !important;
+}
+
+/* 常见问法列表 */
+.cta-shell .cta-welcome__suggestions {
+  background: #ffffff !important;
+  background-image: none !important;
+  border: 1px solid var(--gc-border, #d8ece2) !important;
+  box-shadow: 0 2px 10px rgba(0, 184, 107, 0.05) !important;
+  overflow: hidden;
+}
+
+.cta-shell .cta-welcome__suggestion {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-bottom: 1px solid var(--gc-border, #d8ece2) !important;
+  color: var(--gc-text, #101828) !important;
+  box-shadow: none !important;
+}
+
+.cta-shell .cta-welcome__suggestion:last-child {
+  border-bottom: 0 !important;
+}
+
+.cta-shell .cta-welcome__suggestion:hover {
+  background: var(--gc-soft, #ddf8eb) !important;
+  color: var(--gc-primary, #00b86b) !important;
+}
+
+.cta-shell .cta-welcome__suggestion-text {
+  color: inherit !important;
+}
+
+.cta-shell .cta-welcome__suggestion-arrow,
+.cta-shell .cta-welcome__suggestion:hover .cta-welcome__suggestion-arrow {
+  color: var(--gc-primary, #00b86b) !important;
+  opacity: 0.75 !important;
+}
+
+/* 快速开始卡片 */
+.cta-shell .cta-quick-start__card {
+  background: linear-gradient(180deg, #ffffff 0%, #f0f8f4 100%) !important;
+  background-image: linear-gradient(180deg, #ffffff 0%, #f0f8f4 100%) !important;
+  border: 1px solid rgba(0, 184, 107, 0.35) !important;
+  box-shadow: 0 2px 10px rgba(0, 184, 107, 0.05) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.cta-shell .cta-quick-start__card:hover {
+  background: var(--gc-soft, #ddf8eb) !important;
+  background-image: none !important;
+  border-color: rgba(0, 184, 107, 0.5) !important;
+  box-shadow: 0 6px 18px rgba(0, 184, 107, 0.12) !important;
+}
+
+.cta-shell .cta-quick-start__title {
+  color: var(--gc-text, #101828) !important;
+}
+
+.cta-shell .cta-quick-start__desc {
+  color: var(--gc-text-muted, #98a2b3) !important;
+}
+
+.cta-shell .cta-quick-start__card:hover .cta-quick-start__title {
+  color: var(--gc-primary, #00b86b) !important;
+}
+
+/* 欢迎区场景卡（同类深蓝残留） */
+.cta-shell .cta-welcome__scenario-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f0f8f4 100%) !important;
+  background-image: linear-gradient(180deg, #ffffff 0%, #f0f8f4 100%) !important;
+  border: 1px solid rgba(0, 184, 107, 0.35) !important;
+  box-shadow: 0 2px 10px rgba(0, 184, 107, 0.05) !important;
+  color: var(--gc-text, #101828) !important;
+}
+
+.cta-shell .cta-welcome__scenario-card:hover {
+  background: var(--gc-soft, #ddf8eb) !important;
+  background-image: none !important;
+  border-color: rgba(0, 184, 107, 0.5) !important;
+  box-shadow: 0 6px 18px rgba(0, 184, 107, 0.12) !important;
+}
+
+.cta-shell .cta-welcome__scenario-title {
+  color: var(--gc-text, #101828) !important;
+}
+
+.cta-shell .cta-welcome__scenario-desc {
+  color: var(--gc-text-muted, #98a2b3) !important;
+}
+
+.cta-shell .cta-welcome__scenario-action {
+  background: rgba(0, 184, 107, 0.1) !important;
+  border: 1px solid rgba(0, 184, 107, 0.28) !important;
+  color: var(--gc-primary, #00b86b) !important;
+}
