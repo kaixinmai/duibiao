@@ -133,14 +133,24 @@
   });
 
   init("chart-project", {
-    tooltip: { trigger: "item", textStyle: { fontSize: 15 } },
-    legend: { bottom: 0, textStyle: textStyle },
+    tooltip: { trigger: "item", textStyle: { fontSize: 14 } },
+    legend: {
+      orient: "horizontal",
+      bottom: 2,
+      left: "center",
+      itemWidth: 10,
+      itemHeight: 10,
+      itemGap: 10,
+      textStyle: { fontSize: 13, color: "#475467" },
+    },
     series: [
       {
         type: "pie",
-        radius: ["42%", "68%"],
-        center: ["50%", "46%"],
-        label: { fontSize: 14, color: "#344054" },
+        radius: ["36%", "58%"],
+        center: ["50%", "42%"],
+        avoidLabelOverlap: true,
+        label: { show: false },
+        labelLine: { show: false },
         data: [
           { value: 2, name: "筹备中", itemStyle: { color: "#2e90fa" } },
           { value: 1, name: "建设中", itemStyle: { color: "#f79009" } },
@@ -152,8 +162,8 @@
     graphic: {
       type: "text",
       left: "center",
-      top: "42%",
-      style: { text: "5", fill: "#101828", fontSize: 28, fontWeight: 700, textAlign: "center" },
+      top: "36%",
+      style: { text: "5", fill: "#101828", fontSize: 26, fontWeight: 700, textAlign: "center" },
     },
   });
 

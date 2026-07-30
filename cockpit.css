@@ -181,14 +181,13 @@ html, body {
 
 .ck-hero {
   flex: 1;
-  min-height: 180px;
+  min-height: 220px;
   border-radius: 16px;
   border: 1px solid var(--ck-border);
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.15), rgba(238,246,241,0.55)),
-    radial-gradient(circle at 50% 70%, rgba(0,184,107,0.18), transparent 55%),
-    linear-gradient(160deg, #d9eee3, #b7dccb 40%, #8fc4a8);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
+    linear-gradient(180deg, rgba(16, 24, 40, 0.18), rgba(16, 24, 40, 0.42)),
+    url("./assets/steel-plant-hero.png") center / cover no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
   position: relative;
   overflow: hidden;
 }
@@ -196,14 +195,29 @@ html, body {
 .ck-hero__hint {
   position: absolute;
   left: 50%;
-  top: 42%;
-  transform: translate(-50%, -50%);
+  bottom: 18px;
+  transform: translateX(-50%);
   margin: 0;
-  font-size: 20px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 184, 107, 0.3);
+  font-size: 15px;
   font-weight: 600;
-  color: rgba(16, 24, 40, 0.45);
+  color: #344054;
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.ck-panel--project {
+  overflow: hidden;
+}
+
+.ck-panel--project .ck-chart {
+  min-height: 150px;
+  max-height: 190px;
+  overflow: hidden;
 }
 
 .ck-months {
