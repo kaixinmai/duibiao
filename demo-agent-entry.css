@@ -1,0 +1,78 @@
+/* 大屏共用：左下角智能体入口（参考佳佳形象位） */
+.demo-agent {
+  position: fixed;
+  left: 28px;
+  bottom: 24px;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  pointer-events: auto;
+}
+
+.demo-agent__avatar {
+  width: 120px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.28));
+  transition: transform 0.2s ease;
+}
+
+.demo-agent:hover .demo-agent__avatar {
+  transform: translateY(-4px) scale(1.03);
+}
+
+.demo-agent__bubble {
+  position: relative;
+  max-width: 280px;
+  margin-bottom: 36px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 184, 107, 0.35);
+  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.14);
+  color: #101828;
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+.demo-agent__bubble::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  bottom: 18px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-left: 1px solid rgba(0, 184, 107, 0.35);
+  border-bottom: 1px solid rgba(0, 184, 107, 0.35);
+  transform: rotate(45deg);
+}
+
+.demo-agent--dark .demo-agent__bubble {
+  background: rgba(8, 24, 56, 0.92);
+  border-color: rgba(64, 168, 255, 0.45);
+  color: #e8f3ff;
+  box-shadow: 0 10px 28px rgba(0, 40, 100, 0.45);
+}
+
+.demo-agent--dark .demo-agent__bubble::after {
+  background: rgba(8, 24, 56, 0.92);
+  border-left-color: rgba(64, 168, 255, 0.45);
+  border-bottom-color: rgba(64, 168, 255, 0.45);
+}
+
+@media (max-width: 900px) {
+  .demo-agent__avatar {
+    width: 88px;
+  }
+
+  .demo-agent__bubble {
+    max-width: 200px;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+}
