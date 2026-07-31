@@ -372,6 +372,12 @@
           columnHints.forEach(function (c) {
             if (hint.indexOf(c) >= 0) col = c;
           });
+          // 已被「企业数据是x」完整命中时，跳过弱匹配「…数据是x」
+          if (!col && /数据$/.test(String(hint).trim()) && out.some(function (o) {
+            return o.value === val && o.columnHint;
+          })) {
+            continue;
+          }
           push(hint, val, col);
         }
       }
@@ -406,7 +412,22 @@
   function scoreField(field, utterance) {
     var hintN = norm(utterance.hint);
     var colN = norm(utterance.columnHint || '');
+    var rawHint = String(utterance.hint || '') + String(utterance.columnHint || '');
     if (!hintN && !colN) return 0;
+
+    // 排名列必须出现「排名/位次」，避免把 1.657 误圆成排名 2
+    if (field.column === '行业排名' && !/排名|位次/.test(rawHint)) return 0;
+    if (field.digits === 0) {
+      var v = Number(utterance.value);
+      if (Math.abs(v - Math.round(v)) > 0.001) return 0;
+    }
+    if (field.column && /省平均|行业平均|先进值/.test(field.column)) {
+      var colKey = field.column.replace(/湖北省|河南省|河北省/, '省');
+      if (!colN && rawHint.indexOf(colKey.replace('省平均值', '平均')) < 0 && rawHint.indexOf('先进') < 0) {
+        // 未提列名时，不允许误改基准列
+        if (!/平均|先进|均值/.test(rawHint)) return 0;
+      }
+    }
 
     var score = 0;
     var aliases = field.aliases || [];
