@@ -368,52 +368,59 @@ body.benchmark-ui-active .ac-sidebar-fab {
 }
 
 .benchmark-msg--assistant .benchmark-msg__bubble {
-  background: rgba(16, 36, 76, 0.75);
-  border: 1px solid rgba(56, 120, 220, 0.2);
-  color: rgba(232, 240, 255, 0.92);
+  background: #ffffff;
+  border: 1px solid #d8ece2;
+  color: #101828;
 }
 
 .benchmark-msg__bubble {
   padding: 14px 18px;
   border-radius: 14px;
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.75;
 }
 
 .benchmark-msg__bubble strong {
-  color: #6ee7a0;
-  font-weight: 600;
+  color: #067647;
+  font-weight: 700;
 }
 
 .benchmark-md-table-wrap {
   margin: 12px 0 4px;
   overflow-x: auto;
   border-radius: 10px;
-  border: 1px solid rgba(56, 120, 220, 0.28);
-  background: rgba(8, 20, 48, 0.55);
+  border: 1px solid #d8ece2;
+  background: #ffffff;
 }
 
 .benchmark-md-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 15px;
   min-width: 420px;
+  background: #ffffff;
 }
 
 .benchmark-md-table th,
 .benchmark-md-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(56, 120, 220, 0.18);
+  padding: 12px 14px;
+  border-bottom: 1px solid #eef2f6;
   text-align: left;
   vertical-align: top;
-  color: rgba(232, 240, 255, 0.9);
+  color: #101828;
+  background: #ffffff;
+  line-height: 1.55;
 }
 
 .benchmark-md-table th {
-  background: rgba(14, 42, 88, 0.9);
-  color: #9ec5ff;
-  font-weight: 600;
+  background: #eef8f2;
+  color: #101828;
+  font-weight: 700;
   white-space: nowrap;
+}
+
+.benchmark-md-table tr:nth-child(even) td {
+  background: #f8fbf9;
 }
 
 .benchmark-md-table tr:last-child td {
@@ -421,7 +428,8 @@ body.benchmark-ui-active .ac-sidebar-fab {
 }
 
 .benchmark-md-table td strong {
-  color: #6ee7a0;
+  color: #067647;
+  font-weight: 700;
 }
 
 .benchmark-msg--thinking .benchmark-msg__bubble,
@@ -458,7 +466,7 @@ body.benchmark-ui-active .ac-sidebar-fab {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  color: rgba(220, 235, 255, 0.88);
+  color: #101828;
 }
 
 .benchmark-result-card__tips {
@@ -620,39 +628,42 @@ body.benchmark-ui-active .ac-sidebar-fab {
 .benchmark-result-card__table-wrap {
   overflow-x: auto;
   border-radius: 10px;
-  border: 1px solid rgba(56, 120, 220, 0.15);
+  border: 1px solid #d8ece2;
+  background: #ffffff;
 }
 
 .benchmark-result-card__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 15px;
+  background: #ffffff;
 }
 
 .benchmark-result-card__table th,
 .benchmark-result-card__table td {
-  padding: 9px 12px;
+  padding: 11px 12px;
   text-align: left;
-  border-bottom: 1px solid rgba(56, 120, 220, 0.1);
+  border-bottom: 1px solid #eef2f6;
 }
 
 .benchmark-result-card__table th {
-  background: rgba(56, 120, 220, 0.12);
-  color: rgba(200, 220, 255, 0.85);
-  font-weight: 600;
+  background: #eef8f2;
+  color: #101828;
+  font-weight: 700;
 }
 
 .benchmark-result-card__table td {
-  color: rgba(200, 220, 255, 0.82);
+  color: #101828;
+  background: #ffffff;
 }
 
 .benchmark-result-card__table tr.is-self {
-  background: rgba(11, 110, 58, 0.12);
+  background: #f3fcf7;
 }
 
 .benchmark-result-card__table tr.is-self td {
-  color: #6ee7a0;
-  font-weight: 600;
+  color: #101828;
+  font-weight: 700;
 }
 
 .benchmark-table-ref {
@@ -1155,7 +1166,9 @@ body.benchmark-ui-active .ac-sidebar-fab {
   margin-bottom: 8px;
 }
 
-.benchmark-multidim__table td.is-self {
-  color: #0b5c32;
-  font-weight: 600;
+.benchmark-multidim__table td.is-self,
+.benchmark-multidim__table td.bm-self-cell {
+  color: #101828;
+  font-weight: 700;
+  background: #f3fcf7;
 }

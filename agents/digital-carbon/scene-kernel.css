@@ -1,0 +1,364 @@
+/* 数字碳表 · 金盛兰对标内核补充样式 */
+
+.jsl-upload-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 0 2px;
+}
+
+.jsl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 280px;
+  padding: 6px 8px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #d8ece2;
+  background: #f3fcf7;
+  color: #101828;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jsl-chip button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.jsl-chip button:hover {
+  color: #d92d20;
+}
+
+.jsl-learn-banner {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #86efac;
+  background: linear-gradient(180deg, #ecfdf5, #fff);
+}
+
+.jsl-learn-banner strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #0b6e3a;
+  font-size: 14px;
+}
+
+.jsl-learn-banner p {
+  margin: 0;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.7;
+}
+
+body.dc-view-benchmark .cta-input-bar .agent-copilot-input__icon-btn[title="上传附件"] {
+  color: #00b86b;
+}
+
+/* —— 信息分析及检索 · 整体可折叠 —— */
+.cta-thinking__head.is-foldable {
+  cursor: pointer;
+  user-select: none;
+  border-radius: 8px;
+  margin: -4px -6px 8px;
+  padding: 8px 6px 10px;
+}
+
+.cta-thinking__head.is-foldable:hover {
+  background: rgba(16, 24, 40, 0.03);
+}
+
+.cta-thinking.is-collapsed .cta-thinking__head.is-foldable {
+  margin-bottom: 0;
+  padding-bottom: 8px;
+  border-bottom: 0;
+}
+
+.cta-thinking__fold {
+  appearance: none;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #98a2b3;
+  font-size: 16px;
+  line-height: 1;
+  cursor: inherit;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(90deg);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.cta-thinking__head.is-foldable:hover .cta-thinking__fold {
+  color: #475467;
+}
+
+.cta-thinking.is-collapsed .cta-thinking__fold {
+  transform: rotate(0deg);
+}
+
+.cta-thinking.is-collapsed .cta-thinking__body {
+  display: none;
+}
+
+.cta-thinking.is-collapsed .cta-thinking__head {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* —— 关键词检索 · 资料默认可折叠 —— */
+.cta-thinking--kw-compact .cta-thinking__hint {
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.cta-thinking--kw-compact .cta-thinking__step .cta-thinking__preview-slot {
+  margin-top: 8px;
+}
+
+.jsl-kw-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 4px;
+}
+
+.jsl-kw-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #d0d5dd;
+  background: #f9fafb;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.jsl-kw-search {
+  margin: 2px 0 0;
+}
+
+.jsl-kw-toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #101828;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.55;
+  cursor: pointer;
+  text-align: left;
+}
+
+.jsl-kw-toggle:hover {
+  color: #0b6e3a;
+}
+
+.jsl-kw-toggle-text {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+.jsl-kw-chevron {
+  display: inline-block;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  color: #667085;
+  transform: translateY(1px);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.jsl-kw-toggle:hover .jsl-kw-chevron {
+  color: #0b6e3a;
+}
+
+.jsl-kw-search.is-open .jsl-kw-chevron {
+  transform: rotate(90deg) translateX(1px);
+}
+
+.jsl-kw-body {
+  display: none;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  background: #fafbfc;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.jsl-kw-search.is-open .jsl-kw-body {
+  display: block;
+}
+
+.jsl-kw-section + .jsl-kw-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #e4e7ec;
+}
+
+.jsl-kw-section-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475467;
+  letter-spacing: 0.02em;
+}
+
+.jsl-kw-section-title--green {
+  color: #0b6e3a;
+}
+
+.jsl-kw-link-list,
+.jsl-kw-plat-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jsl-kw-link-item {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.jsl-kw-idx {
+  flex-shrink: 0;
+  color: #98a2b3;
+  min-width: 1.6em;
+}
+
+.jsl-kw-link {
+  color: #2563eb;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.jsl-kw-link:hover {
+  text-decoration: underline;
+}
+
+.jsl-kw-plat-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 7px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #344054;
+}
+
+.jsl-kw-plat-item.is-green {
+  color: #0b6e3a;
+  font-weight: 600;
+}
+
+.jsl-kw-robot {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #0b6e3a;
+}
+
+.jsl-kw-learn {
+  font-size: 12px;
+  color: #475467;
+  line-height: 1.7;
+}
+
+/* —— 思考完成后仅报告入口 —— */
+.jsl-report-ready {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 20px;
+  padding: 6px 4px 4px;
+}
+
+.jsl-report-ready__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.jsl-report-ready__title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #101828;
+  line-height: 1.4;
+}
+
+.jsl-report-ready__desc {
+  margin: 0;
+  font-size: 13px;
+  color: #667085;
+  line-height: 1.55;
+}
+
+.jsl-report-ready__btn {
+  appearance: none;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 10px;
+  background: #2f6bff;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.jsl-report-ready__btn:hover {
+  background: #1f54e0;
+}
+
+.jsl-report-ready__btn:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 640px) {
+  .jsl-report-ready {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .jsl-report-ready__btn {
+    width: 100%;
+    text-align: center;
+  }
+}

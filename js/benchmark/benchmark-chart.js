@@ -1,9 +1,23 @@
 /**
- * 碳对标智能体 - ECharts 图表渲染
+ * 碳对标智能体 - ECharts 图表渲染（白绿主题高对比）
  */
 var BenchmarkChart = {
   _instances: {},
   DEFAULT_HEIGHT: 300,
+
+  COLORS: {
+    axis: '#344054',
+    axisMuted: '#667085',
+    split: '#e4efe9',
+    self: '#2e90fa',
+    peer: '#12b76a',
+    tooltipBg: '#ffffff',
+    tooltipBorder: '#d8ece2',
+    tooltipText: '#101828',
+    radarSplit: '#d0d5dd',
+    radarAreaA: 'rgba(46, 144, 250, 0.08)',
+    radarAreaB: 'rgba(18, 183, 106, 0.06)',
+  },
 
   render: function (containerId, chartType, data) {
     if (typeof echarts === 'undefined') {
@@ -34,7 +48,7 @@ var BenchmarkChart = {
     var chart = echarts.init(el, null, {
       renderer: 'canvas',
       width: width,
-      height: this.DEFAULT_HEIGHT
+      height: this.DEFAULT_HEIGHT,
     });
     this._instances[containerId] = chart;
 
@@ -65,35 +79,32 @@ var BenchmarkChart = {
 
   rankBarOption: function (data) {
     if (!data || !data.values || !data.categories) return {};
-
+    var C = this.COLORS;
     var highlightIndex = typeof data.highlightIndex === 'number' ? data.highlightIndex : -1;
     var avg = data.values.reduce(function (a, b) { return a + b; }, 0) / data.values.length;
 
     return {
       backgroundColor: 'transparent',
-      grid: { left: 80, right: 36, top: 28, bottom: 28, containLabel: false },
+      grid: { left: 88, right: 40, top: 28, bottom: 28, containLabel: false },
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
-        backgroundColor: 'rgba(12,28,58,0.92)',
-        borderColor: 'rgba(56,120,220,0.3)',
-        textStyle: { color: '#e8f0ff', fontSize: 12 }
+        backgroundColor: C.tooltipBg,
+        borderColor: C.tooltipBorder,
+        textStyle: { color: C.tooltipText, fontSize: 14 },
       },
       xAxis: {
         type: 'value',
         name: data.unit || 'tCO₂/t',
-        nameTextStyle: { color: 'rgba(148,180,230,0.6)', fontSize: 11 },
-        axisLabel: { color: 'rgba(200,220,255,0.6)', fontSize: 11 },
-        splitLine: { lineStyle: { color: 'rgba(56,120,220,0.12)' } }
+        nameTextStyle: { color: C.axisMuted, fontSize: 13 },
+        axisLabel: { color: C.axis, fontSize: 13 },
+        splitLine: { lineStyle: { color: C.split } },
       },
       yAxis: {
         type: 'category',
         data: data.categories,
-        axisLabel: {
-          color: 'rgba(200,220,255,0.75)',
-          fontSize: 11
-        },
-        axisLine: { lineStyle: { color: 'rgba(56,120,220,0.25)' } }
+        axisLabel: { color: C.axis, fontSize: 13 },
+        axisLine: { lineStyle: { color: C.split } },
       },
       series: [{
         type: 'bar',
@@ -102,73 +113,90 @@ var BenchmarkChart = {
           return {
             value: v,
             itemStyle: {
-              color: isSelf
-                ? '#38b4ff'
-                : v <= avg ? '#6ee7a0' : '#7dd3fc',
-              borderRadius: [0, 4, 4, 0]
+              color: isSelf ? C.self : v <= avg ? C.peer : '#53b1fd',
+              borderRadius: [0, 4, 4, 0],
             },
-            label: isSelf ? {
-              show: true,
-              position: 'right',
-              color: '#6ee7a0',
-              fontSize: 11,
-              formatter: '本企业'
-            } : { show: false }
+            label: isSelf
+              ? {
+                  show: true,
+                  position: 'right',
+                  color: C.peer,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  formatter: '本企业',
+                }
+              : { show: false },
           };
         }),
         barMaxWidth: 22,
-        animationDuration: 900
-      }]
+        animationDuration: 900,
+      }],
     };
   },
 
   barOption: function (data) {
     if (!data || !data.values || !data.categories) return {};
+    var C = this.COLORS;
     var avg = data.values.reduce(function (a, b) { return a + b; }, 0) / data.values.length;
     return {
       backgroundColor: 'transparent',
-      grid: { left: 48, right: 24, top: 36, bottom: 64 },
-      tooltip: { trigger: 'axis' },
+      grid: { left: 52, right: 24, top: 36, bottom: 64 },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: C.tooltipBg,
+        borderColor: C.tooltipBorder,
+        textStyle: { color: C.tooltipText, fontSize: 14 },
+      },
       xAxis: {
         type: 'category',
         data: data.categories,
-        axisLabel: { color: 'rgba(200,220,255,0.7)', fontSize: 11, rotate: 28 }
+        axisLabel: { color: C.axis, fontSize: 13, rotate: 28 },
       },
       yAxis: {
         type: 'value',
         name: data.unit,
-        axisLabel: { color: 'rgba(200,220,255,0.6)', fontSize: 11 }
+        nameTextStyle: { color: C.axisMuted, fontSize: 13 },
+        axisLabel: { color: C.axis, fontSize: 13 },
+        splitLine: { lineStyle: { color: C.split } },
       },
       series: [{
         type: 'bar',
         data: data.values.map(function (v) {
-          return { value: v, itemStyle: { color: v <= avg ? '#6ee7a0' : '#7dd3fc' } };
+          return { value: v, itemStyle: { color: v <= avg ? C.peer : '#53b1fd' } };
         }),
-        barMaxWidth: 36
-      }]
+        barMaxWidth: 36,
+      }],
     };
   },
 
   groupBarOption: function (data) {
     if (!data || !data.categories || !data.series) return {};
+    var C = this.COLORS;
     return {
       backgroundColor: 'transparent',
-      grid: { left: 48, right: 24, top: 40, bottom: 64 },
-      tooltip: { trigger: 'axis' },
+      grid: { left: 52, right: 24, top: 44, bottom: 64 },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: C.tooltipBg,
+        borderColor: C.tooltipBorder,
+        textStyle: { color: C.tooltipText, fontSize: 14 },
+      },
       legend: {
         top: 0,
-        textStyle: { color: 'rgba(200,220,255,0.75)', fontSize: 11 }
+        textStyle: { color: C.axis, fontSize: 14 },
       },
       xAxis: {
         type: 'category',
         data: data.categories,
-        axisLabel: { color: 'rgba(200,220,255,0.7)', fontSize: 11, rotate: 20 }
+        axisLabel: { color: C.axis, fontSize: 13, rotate: 20 },
       },
       yAxis: {
         type: 'value',
         name: data.unit || '',
         max: 120,
-        axisLabel: { color: 'rgba(200,220,255,0.6)', fontSize: 11 }
+        nameTextStyle: { color: C.axisMuted, fontSize: 13 },
+        axisLabel: { color: C.axis, fontSize: 13 },
+        splitLine: { lineStyle: { color: C.split } },
       },
       series: data.series.map(function (s, idx) {
         return {
@@ -176,30 +204,31 @@ var BenchmarkChart = {
           type: 'bar',
           data: s.values,
           barMaxWidth: 28,
-          itemStyle: { color: idx === 0 ? '#38b4ff' : '#6ee7a0' }
+          itemStyle: { color: idx === 0 ? C.self : C.peer },
         };
-      })
+      }),
     };
   },
 
   radarOption: function (data) {
     if (!data || !data.indicators || !data.series) return {};
+    var C = this.COLORS;
 
     return {
       backgroundColor: 'transparent',
       legend: {
         bottom: 0,
-        textStyle: { color: 'rgba(200,220,255,0.75)', fontSize: 12 },
-        data: data.series.map(function (s) { return s.name; })
+        textStyle: { color: C.axis, fontSize: 14 },
+        data: data.series.map(function (s) { return s.name; }),
       },
       radar: {
         indicator: data.indicators,
         center: ['50%', '46%'],
         radius: '58%',
-        axisName: { color: 'rgba(200,220,255,0.7)', fontSize: 11 },
-        splitLine: { lineStyle: { color: 'rgba(56,120,220,0.15)' } },
-        splitArea: { areaStyle: { color: ['rgba(56,120,220,0.04)', 'rgba(56,120,220,0.08)'] } },
-        axisLine: { lineStyle: { color: 'rgba(56,120,220,0.2)' } }
+        axisName: { color: C.axis, fontSize: 13 },
+        splitLine: { lineStyle: { color: C.radarSplit } },
+        splitArea: { areaStyle: { color: [C.radarAreaA, C.radarAreaB] } },
+        axisLine: { lineStyle: { color: C.radarSplit } },
       },
       series: [{
         type: 'radar',
@@ -208,12 +237,12 @@ var BenchmarkChart = {
           return {
             name: s.name,
             value: s.values,
-            areaStyle: { opacity: idx === 0 ? 0.3 : 0.15 },
+            areaStyle: { opacity: idx === 0 ? 0.28 : 0.16 },
             lineStyle: { width: 2 },
-            itemStyle: { color: idx === 0 ? '#38b4ff' : '#6ee7a0' }
+            itemStyle: { color: idx === 0 ? C.self : C.peer },
           };
-        })
-      }]
+        }),
+      }],
     };
   },
 
@@ -235,7 +264,7 @@ var BenchmarkChart = {
       return this._instances[containerId].getDataURL({
         type: 'png',
         pixelRatio: 2,
-        backgroundColor: '#0a1628'
+        backgroundColor: '#ffffff',
       });
     } catch (e) {
       return '';
@@ -247,5 +276,5 @@ var BenchmarkChart = {
       if (this._instances[id]) this._instances[id].dispose();
     });
     this._instances = {};
-  }
+  },
 };

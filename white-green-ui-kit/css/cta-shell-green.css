@@ -1819,3 +1819,400 @@ body.bg-agent-bg .bg-slate-900\/80 {
   border: 1px solid rgba(0, 184, 107, 0.28) !important;
   color: var(--gc-primary, #00b86b) !important;
 }
+
+/* ========== 对标结果卡片：白绿主题高对比可读（避免深蓝残留浅字） ========== */
+.cta-shell .benchmark-result-card {
+  color: #101828 !important;
+  gap: 16px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.cta-shell .benchmark-result-card__tips {
+  background: #f3fcf7 !important;
+  border: 1px solid #b7e4cb !important;
+  padding: 16px 18px !important;
+}
+
+.cta-shell .benchmark-result-card__tips-title {
+  color: #067647 !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  margin-bottom: 12px !important;
+}
+
+.cta-shell .benchmark-result-card__tips-list li {
+  color: #101828 !important;
+  font-size: 16px !important;
+  line-height: 1.75 !important;
+  gap: 10px !important;
+}
+
+.cta-shell .benchmark-result-card__tip-index {
+  width: 24px !important;
+  height: 24px !important;
+  background: #00b86b !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+}
+
+.cta-shell .benchmark-result-card__chart {
+  background: #ffffff !important;
+  border: 1px solid #d8ece2 !important;
+  padding: 14px !important;
+  border-radius: 12px !important;
+}
+
+.cta-shell .benchmark-result-card__chart .benchmark-chart {
+  width: 100% !important;
+  min-height: 300px !important;
+  height: 300px !important;
+}
+
+.cta-shell .benchmark-chart-wrap {
+  background: #ffffff !important;
+  border: 1px solid #d8ece2 !important;
+}
+
+.cta-shell .benchmark-result-card__summary {
+  color: #344054 !important;
+  font-size: 15px !important;
+  gap: 12px !important;
+}
+
+.cta-shell .benchmark-result-card__summary strong {
+  color: #067647 !important;
+}
+
+.cta-shell .benchmark-result-card__table-wrap {
+  border: 1px solid #d8ece2 !important;
+  background: #ffffff !important;
+}
+
+.cta-shell .benchmark-result-card__table {
+  font-size: 16px !important;
+}
+
+.cta-shell .benchmark-result-card__table th,
+.cta-shell .benchmark-result-card__table td {
+  padding: 12px 14px !important;
+  line-height: 1.55 !important;
+  border-bottom-color: #e4efe9 !important;
+}
+
+.cta-shell .benchmark-result-card__table th {
+  background: #eef8f2 !important;
+  color: #101828 !important;
+  font-size: 15px !important;
+}
+
+.cta-shell .benchmark-result-card__table td {
+  color: #101828 !important;
+}
+
+.cta-shell .benchmark-result-card__table tr.is-self {
+  background: #e8f8ef !important;
+}
+
+.cta-shell .benchmark-result-card__table tr.is-self td {
+  color: #067647 !important;
+  font-weight: 700 !important;
+}
+
+.cta-shell .benchmark-table-ref__label {
+  color: #344054 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+.cta-shell .benchmark-compare-btn {
+  width: 30px !important;
+  height: 30px !important;
+  background: #ffffff !important;
+  border: 1px solid #b7e4cb !important;
+  color: #067647 !important;
+}
+
+.cta-shell .benchmark-compare-btn:hover {
+  background: #e8f8ef !important;
+  border-color: #00b86b !important;
+  color: #067647 !important;
+}
+
+.cta-shell .benchmark-rank-list {
+  background: #f8fafc !important;
+  border: 1px solid #d0d5dd !important;
+  padding: 16px 18px !important;
+}
+
+.cta-shell .benchmark-rank-list__title {
+  color: #101828 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+}
+
+.cta-shell .benchmark-rank-list__head {
+  color: #344054 !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+
+.cta-shell .benchmark-rank-list__head strong {
+  color: #067647 !important;
+}
+
+.cta-shell .benchmark-rank-item {
+  color: #101828 !important;
+  font-size: 15px !important;
+  padding: 10px 8px !important;
+  min-height: 40px;
+}
+
+.cta-shell .benchmark-rank-item__no {
+  color: #667085 !important;
+  font-size: 14px !important;
+}
+
+.cta-shell .benchmark-rank-item__name {
+  color: #101828 !important;
+  font-size: 15px !important;
+}
+
+.cta-shell .benchmark-rank-item__val {
+  color: #344054 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+
+.cta-shell .benchmark-rank-item.is-self,
+.cta-shell .benchmark-rank-item--self {
+  background: #e8f8ef !important;
+  border: 1px solid #b7e4cb !important;
+  color: #067647 !important;
+  font-weight: 700 !important;
+}
+
+.cta-shell .benchmark-rank-item--self .benchmark-rank-item__no,
+.cta-shell .benchmark-rank-item--self .benchmark-rank-item__name,
+.cta-shell .benchmark-rank-item--self .benchmark-rank-item__val {
+  color: #067647 !important;
+}
+
+.cta-shell .benchmark-multidim__title {
+  color: #101828 !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+}
+
+.cta-shell .benchmark-multidim__hint {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #475467 !important;
+}
+
+.cta-shell .benchmark-multidim__wrap,
+.cta-shell .benchmark-result-card__table-wrap {
+  background: #ffffff !important;
+  border: 1px solid #d8ece2 !important;
+  border-radius: 12px !important;
+  overflow-x: auto;
+}
+
+.cta-shell .benchmark-multidim__table,
+.cta-shell .benchmark-result-card__table {
+  background: #ffffff !important;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cta-shell .benchmark-multidim__table thead th,
+.cta-shell .benchmark-result-card__table thead th,
+.cta-shell .benchmark-multidim__table th,
+.cta-shell .benchmark-result-card__table th {
+  background: #eef8f2 !important;
+  color: #101828 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid #d8ece2 !important;
+  text-align: left;
+}
+
+.cta-shell .benchmark-multidim__table tbody td,
+.cta-shell .benchmark-result-card__table tbody td,
+.cta-shell .benchmark-multidim__table td,
+.cta-shell .benchmark-result-card__table td {
+  background: #ffffff !important;
+  color: #101828 !important;
+  font-size: 16px !important;
+  line-height: 1.55 !important;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid #eef2f6 !important;
+}
+
+.cta-shell .benchmark-multidim__table tbody tr:nth-child(even) td,
+.cta-shell .benchmark-result-card__table tbody tr:nth-child(even) td {
+  background: #f8fbf9 !important;
+}
+
+.cta-shell .benchmark-multidim__table td.is-self,
+.cta-shell .benchmark-multidim__table td.bm-self-cell,
+.cta-shell .benchmark-result-card__table td.is-self {
+  color: #101828 !important;
+  font-weight: 700 !important;
+  background: #f3fcf7 !important;
+}
+
+.cta-shell .bm-self-cell strong {
+  color: #101828 !important;
+  font-size: 16px;
+}
+
+.cta-shell .bm-gap-cell {
+  color: #344054 !important;
+  font-size: 15px !important;
+}
+
+.cta-shell .bm-source-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.cta-shell .bm-source-tag--local {
+  background: #eef2f6;
+  color: #344054;
+  border: 1px solid #d0d5dd;
+}
+
+.cta-shell .bm-source-tag--cloud {
+  background: #ecfdf5;
+  color: #067647 !important;
+  border: 1px solid #86efac;
+}
+
+.cta-shell .bm-robot-icon {
+  color: #067647;
+  flex-shrink: 0;
+}
+
+.cta-shell .benchmark-dashboard {
+  background: #f3fcf7 !important;
+  border: 1px solid #d8ece2 !important;
+}
+
+.cta-shell .benchmark-dashboard__title {
+  color: #101828 !important;
+  font-size: 16px !important;
+}
+
+.cta-shell .benchmark-dashboard__hint {
+  color: #475467 !important;
+  font-size: 14px !important;
+}
+
+.cta-shell .benchmark-dash-card {
+  background: #ffffff !important;
+  border: 1px solid #d8ece2 !important;
+}
+
+.cta-shell .benchmark-dash-card__label,
+.cta-shell .benchmark-dash-card__sub {
+  color: #475467 !important;
+  font-size: 14px !important;
+}
+
+.cta-shell .benchmark-dash-card__value {
+  color: #101828 !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+}
+
+.cta-shell .benchmark-dash-card__source {
+  color: #667085 !important;
+  font-size: 14px !important;
+}
+
+.cta-shell .benchmark-msg__actions .benchmark-action-btn,
+.cta-shell .benchmark-action-btn {
+  font-size: 15px !important;
+  min-height: 40px;
+  padding: 8px 14px !important;
+}
+
+.cta-shell .cta-msg__content,
+.cta-shell .cta-msg__bubble {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #101828;
+}
+
+.cta-shell .benchmark-msg__bubble {
+  background: #ffffff !important;
+  border: 1px solid #d8ece2 !important;
+  color: #101828 !important;
+  font-size: 16px !important;
+  line-height: 1.75 !important;
+}
+
+.cta-shell .benchmark-msg__bubble strong {
+  color: #067647 !important;
+  font-weight: 700 !important;
+}
+
+.cta-shell .benchmark-md-table-wrap {
+  background: #ffffff !important;
+  border: 1px solid #d8ece2 !important;
+}
+
+.cta-shell .benchmark-md-table,
+.cta-shell .benchmark-md-table th,
+.cta-shell .benchmark-md-table td {
+  background: #ffffff !important;
+  color: #101828 !important;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+}
+
+.cta-shell .benchmark-md-table th {
+  background: #eef8f2 !important;
+  color: #101828 !important;
+  font-weight: 700 !important;
+}
+
+.cta-shell .benchmark-md-table tr:nth-child(even) td {
+  background: #f8fbf9 !important;
+}
+
+.cta-shell .benchmark-md-table td strong {
+  color: #067647 !important;
+}
+
+.cta-shell .cta-think-table th,
+.cta-shell .cta-think-table td {
+  font-size: 14px !important;
+  color: #101828 !important;
+  line-height: 1.55 !important;
+  padding: 8px 10px !important;
+}
+
+.cta-shell .cta-thinking__step-text,
+.cta-shell .cta-thinking__title,
+.cta-shell .cta-thinking__hint {
+  color: #101828 !important;
+  line-height: 1.6;
+}
+
+.cta-shell .cta-thinking__hint {
+  color: #475467 !important;
+  font-size: 14px !important;
+}

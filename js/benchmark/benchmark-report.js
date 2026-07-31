@@ -362,6 +362,8 @@ var BenchmarkReport = {
     return {
       enterpriseName: enterpriseName,
       periodLabel: periodLabel,
+      periodGrain: /^\d{4}$/.test(String((payload && payload.period) || '')) ? '年度' : '月度',
+      periodDisplay: null,
       provinceName: '河南',
       provinceAvg: provinceAvg,
       industryAvg: industryAvg,
@@ -674,7 +676,7 @@ var BenchmarkReport = {
         '<div class="header">' +
           '<div class="brand">Steel Intelligent Benchmark Report</div>' +
           '<h1>' + BenchmarkReport.escape(model.enterpriseName) + '智能对标分析报告</h1>' +
-          '<div class="sub">' + BenchmarkReport.escape(summary) + '<br>统计周期：' + BenchmarkReport.escape(model.periodLabel) + '（月度）</div>' +
+          '<div class="sub">' + BenchmarkReport.escape(summary) + '<br>统计周期：' + BenchmarkReport.escape(model.periodDisplay || (model.periodLabel + (model.periodGrain ? '（' + model.periodGrain + '）' : ''))) + '</div>' +
         '</div>' +
         '<div class="meta-bar">' +
           '<span>报告编号：CB-' + Date.now().toString(36).toUpperCase() + '</span>' +
@@ -682,16 +684,6 @@ var BenchmarkReport = {
           '<span>出品：佳华智联 · 数据对标智能体</span>' +
         '</div>' +
         '<div class="content">' +
-          '<div class="toc"><h3>目录</h3><ol>' +
-            '<li>报告定位与核心思路</li>' +
-            '<li>和重点工序对标（' + BenchmarkReport.escape(model.periodLabel) + '）</li>' +
-            '<li>企业碳排放强度数据对标（' + BenchmarkReport.escape(model.periodLabel) + '）</li>' +
-            '<li>工序碳排放强度数据对标（' + BenchmarkReport.escape(model.periodLabel) + '）</li>' +
-            '<li>优势与短板</li>' +
-            '<li>降碳行动建议</li>' +
-            '<li>企业减排潜力深度分析</li>' +
-            '<li>数据来源</li>' +
-          '</ol></div>' +
 
           '<div class="section" id="s1"><h2>01 · 报告定位与核心思路</h2>' +
             '<p class="lead">' + BenchmarkReport.escape(model.positioning) + '</p></div>' +

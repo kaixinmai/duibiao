@@ -205,7 +205,7 @@ html, body {
   overflow: visible;
 }
 
-/* 智能体贴住中间厂区图左下角，静态形象常驻不消失 */
+/* 智能体贴住中间厂区图左下角：静态形象常驻，仅保留一个气泡 */
 .ck-hero .demo-agent--cockpit {
   position: absolute;
   left: 12px;
@@ -214,9 +214,11 @@ html, body {
   transform: none;
   z-index: 6;
   max-width: calc(100% - 16px);
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: flex-end;
-  gap: 6px;
+  gap: 8px;
   line-height: 0;
   font-size: 0;
 }
@@ -230,14 +232,28 @@ html, body {
   display: block;
   margin: 0;
   vertical-align: bottom;
+  opacity: 1 !important;
+  visibility: visible !important;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  animation: ck-agent-float 3.2s ease-in-out infinite;
+}
+
+@keyframes ck-agent-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.ck-hero .demo-agent--cockpit:hover .demo-agent__avatar {
+  animation-play-state: paused;
 }
 
 .ck-hero .demo-agent--cockpit .demo-agent__bubble {
-  margin: 0 0 110px;
-  max-width: 220px;
+  position: relative;
+  margin: 0 0 120px;
+  max-width: 240px;
   font-size: 15px;
   line-height: 1.45;
+  flex-shrink: 1;
 }
 
 .ck-panel--project {

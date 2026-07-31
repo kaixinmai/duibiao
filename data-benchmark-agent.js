@@ -361,6 +361,7 @@
       title: '多源数据融合分析中…',
       doneTitle: '分析完成',
       hint: '正在连接六大专有数据库，逐步完成推理与方案匹配',
+      collapsible: true,
       runningStatus: '分析中…',
       doneStatus: '✓ 已完成',
     });
@@ -576,6 +577,10 @@
       messagesHtml: messagesEl.innerHTML,
       welcomeHidden: !!(welcome && welcome.classList.contains('hidden')),
       inputDraft: inputEl ? inputEl.value : '',
+      benchmarkPayloads:
+        typeof BenchmarkResultCard !== 'undefined' && BenchmarkResultCard.getAllPayloads
+          ? BenchmarkResultCard.getAllPayloads()
+          : {},
       state: {
         cap: state.cap,
         year: state.year,
@@ -639,6 +644,27 @@
     if (inputEl) inputEl.value = session.inputDraft || '';
     messagesEl.innerHTML = session.messagesHtml || '';
 
+    if (typeof BenchmarkChart !== 'undefined') {
+      try {
+        BenchmarkChart.disposeAll();
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    if (typeof BenchmarkResultCard !== 'undefined') {
+      if (session.benchmarkPayloads && BenchmarkResultCard.restorePayloads) {
+        BenchmarkResultCard.restorePayloads(session.benchmarkPayloads);
+      }
+      if (BenchmarkResultCard.remountChartsInDocument) {
+        requestAnimationFrame(function () {
+          BenchmarkResultCard.remountChartsInDocument(messagesEl);
+          setTimeout(function () {
+            if (typeof BenchmarkChart !== 'undefined') BenchmarkChart.resizeAll();
+          }, 320);
+        });
+      }
+    }
+
     if (session.welcomeHidden) {
       ensureChatVisible();
     } else {
@@ -648,6 +674,7 @@
 
     syncSendBtn();
     ensureMessageAvatars();
+    bindThinkingFoldToggle();
     requestAnimationFrame(function () { scrollToBottom(); });
   }
 
@@ -878,10 +905,24 @@
   }
 
   function getQuerySteps() {
+    if (
+      window.DemoSceneKernel &&
+      typeof window.DemoSceneKernel.getQuerySteps === 'function'
+    ) {
+      var customSteps = window.DemoSceneKernel.getQuerySteps(lastUserText);
+      if (customSteps && customSteps.length) return customSteps;
+    }
     return getBenchmarkQuerySteps();
   }
 
   function getAnalysisSteps() {
+    if (
+      window.DemoSceneKernel &&
+      typeof window.DemoSceneKernel.getAnalysisSteps === 'function'
+    ) {
+      var customAnalysis = window.DemoSceneKernel.getAnalysisSteps(lastUserText);
+      if (customAnalysis && customAnalysis.length) return customAnalysis;
+    }
     return lastAnalysisSteps.length ? lastAnalysisSteps : [
       { id: 'rank', text: '计算行业排名位次与百分位' },
       { id: 'gap', text: '多维度对比碳效指标并检索脱敏对标样本' },
@@ -1055,23 +1096,68 @@
     return !!(text && String(text).trim());
   }
 
+  function bindThinkingFoldToggle() {
+    if (window.__ctaThinkingFoldBound) return;
+    window.__ctaThinkingFoldBound = true;
+
+    function toggleFromHead(head) {
+      var root = head.closest('.cta-thinking');
+      if (!root) return;
+      var foldBtn = root.querySelector('.cta-thinking__fold');
+      var collapsed = root.classList.toggle('is-collapsed');
+      head.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      if (foldBtn) {
+        foldBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        foldBtn.setAttribute('title', collapsed ? '展开' : '折叠');
+        foldBtn.setAttribute('aria-label', collapsed ? '展开详情' : '折叠详情');
+      }
+    }
+
+    document.addEventListener('click', function (e) {
+      var head = e.target && e.target.closest && e.target.closest('.cta-thinking__head.is-foldable');
+      if (!head) return;
+      e.preventDefault();
+      toggleFromHead(head);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var head = e.target && e.target.closest && e.target.closest('.cta-thinking__head.is-foldable');
+      if (!head || e.target !== head) return;
+      e.preventDefault();
+      toggleFromHead(head);
+    });
+  }
+
   function createProcessBlock(config) {
     ensureChatVisible();
     var wrap = document.createElement('div');
     wrap.className = 'cta-msg is-assistant cta-msg--full';
+    var foldHtml = config.collapsible
+      ? '<button type="button" class="cta-thinking__fold" tabindex="-1" aria-hidden="true" title="折叠" aria-label="折叠详情">›</button>'
+      : '';
+    var headClass = 'cta-thinking__head' + (config.collapsible ? ' is-foldable' : '');
     wrap.innerHTML =
       assistantAvatarHtml() +
       '<div class="cta-msg__bubble cta-msg__bubble--wide">' +
         '<div class="cta-thinking' + (config.modifier ? ' ' + config.modifier : '') + '">' +
-          '<div class="cta-thinking__head">' +
+          '<div class="' + headClass + '"' +
+            (config.collapsible
+              ? ' role="button" tabindex="0" aria-expanded="true" title="点击展开或折叠"'
+              : '') +
+          '>' +
             '<span class="cta-thinking__spinner"></span>' +
             '<span class="cta-thinking__title">' + esc(config.title) + '</span>' +
             '<span class="cta-thinking__elapsed"></span>' +
+            foldHtml +
           '</div>' +
-          '<p class="cta-thinking__hint">' + esc(config.hint) + '</p>' +
-          '<ul class="cta-thinking__steps"></ul>' +
+          '<div class="cta-thinking__body">' +
+            '<p class="cta-thinking__hint">' + esc(config.hint) + '</p>' +
+            '<ul class="cta-thinking__steps"></ul>' +
+          '</div>' +
         '</div>' +
       '</div>';
+    if (config.collapsible) bindThinkingFoldToggle();
     messagesEl.appendChild(wrap);
     scrollToBottom();
     return wrap;
@@ -1134,6 +1220,17 @@
           if (headTitle) headTitle.textContent = config.doneTitle;
           if (spinner) spinner.classList.add('is-done');
           tickElapsed();
+          if (config.collapseOnDone && root) {
+            root.classList.add('is-collapsed');
+            var foldBtn = root.querySelector('.cta-thinking__fold');
+            var head = root.querySelector('.cta-thinking__head');
+            if (head) head.setAttribute('aria-expanded', 'false');
+            if (foldBtn) {
+              foldBtn.setAttribute('aria-expanded', 'false');
+              foldBtn.setAttribute('title', '展开');
+              foldBtn.setAttribute('aria-label', '展开详情');
+            }
+          }
           saveSession();
           resolve();
           return;
@@ -1156,12 +1253,72 @@
   }
 
   function runQueryPhase() {
-    lastQuerySteps = getBenchmarkQuerySteps();
+    lastQuerySteps = getQuerySteps();
+    var phaseCfg =
+      window.DemoSceneKernel &&
+      typeof window.DemoSceneKernel.getQueryPhaseConfig === 'function'
+        ? window.DemoSceneKernel.getQueryPhaseConfig(lastUserText) || {}
+        : {};
+    var kernelId = window.DemoSceneKernel && window.DemoSceneKernel.id;
+    var kernelHint = '';
+    if (kernelId === 'digital-carbon-jinshenglan' || (lastQuerySteps[0] && lastQuerySteps[0].id === 'kw-parse')) {
+      kernelHint = 'jinshenglan';
+    } else if (
+      window.DemoSceneKernel &&
+      typeof window.DemoSceneKernel.getQuerySteps === 'function' &&
+      lastQuerySteps &&
+      lastQuerySteps[0] &&
+      lastQuerySteps[0].id === 'parse'
+    ) {
+      var parseText = String(lastQuerySteps[0].text || '');
+      if (/冀东/.test(parseText)) {
+        kernelHint = 'jidong';
+      } else if (/金盛兰|数字碳表内核/.test(parseText)) {
+        kernelHint = 'jinshenglan';
+      } else if (/绿色低碳管理平台|输入工序|上传/.test(parseText)) {
+        kernelHint = 'green';
+      } else if (/内核/.test(parseText)) {
+        kernelHint = 'generic';
+      }
+    }
+
+    var defaultTitle =
+      kernelHint === 'jidong'
+        ? '正在汇聚冀东多源数据…'
+        : kernelHint === 'jinshenglan'
+          ? '信息分析及检索中…'
+          : kernelHint === 'green'
+            ? '正在汇聚绿色平台多源数据…'
+            : kernelHint
+              ? '正在按场景内核汇聚数据…'
+              : '正在查询对标数据…';
+    var defaultDoneTitle =
+      kernelHint === 'jidong'
+        ? '冀东多源数据汇聚完成'
+        : kernelHint === 'jinshenglan'
+          ? '信息分析及检索'
+          : kernelHint === 'green'
+            ? '绿色平台多源数据汇聚完成'
+            : kernelHint
+              ? '场景内核数据汇聚完成'
+              : '对标数据查询完成';
+    var defaultHint =
+      kernelHint === 'jidong'
+        ? '按内核拉取网站 / 百度 / 佳华双碳云图 / 本地库（仅冀东范围）'
+        : kernelHint === 'jinshenglan'
+          ? '客户自有（金盛兰业务系统）· 佳华双碳云图 · 互联网公开数据'
+          : kernelHint === 'green'
+            ? '按内核汇聚网站 / 百度 / 佳华双碳云图，并结合工序录入与上传材料（仅输入工序）'
+            : kernelHint
+              ? '按场景内核拉取多源数据并生成分析'
+              : '正在连接佳华五大核心数据源，逐步检索行业样本与企业碳效数据';
+
     var wrap = createProcessBlock({
-      modifier: 'cta-thinking--query',
-      title: '正在查询对标数据…',
-      doneTitle: '对标数据查询完成',
-      hint: '正在连接佳华五大核心数据源，逐步检索行业样本与企业碳效数据',
+      modifier: phaseCfg.modifier || 'cta-thinking--query',
+      title: phaseCfg.title || defaultTitle,
+      doneTitle: phaseCfg.doneTitle || defaultDoneTitle,
+      hint: phaseCfg.hint || defaultHint,
+      collapsible: phaseCfg.collapsible != null ? !!phaseCfg.collapsible : true,
       runningStatus: '查询中…',
       doneStatus: '✓ 已返回',
       doneStatusWithPreview: '✓ 已返回',
@@ -1170,26 +1327,38 @@
       runningStatus: '查询中…',
       doneStatus: '✓ 已返回',
       doneStatusWithPreview: '✓ 已返回',
-      doneTitle: '对标数据查询完成',
-      defaultDelay: 500,
+      doneTitle: phaseCfg.doneTitle || defaultDoneTitle,
+      defaultDelay: phaseCfg.defaultDelay != null ? phaseCfg.defaultDelay : 500,
+      stepDelay: phaseCfg.stepDelay,
+      startDelay: phaseCfg.startDelay,
+      collapseOnDone: !!phaseCfg.collapseOnDone,
     });
   }
 
   function runAnalysisPhase() {
+    var analysisCfg =
+      window.DemoSceneKernel &&
+      typeof window.DemoSceneKernel.getAnalysisPhaseConfig === 'function'
+        ? window.DemoSceneKernel.getAnalysisPhaseConfig(lastUserText) || {}
+        : {};
     var wrap = createProcessBlock({
-      modifier: 'cta-thinking--analysis',
-      title: '智能体思考中…',
-      doneTitle: '思考完成',
-      hint: '基于已查询的行业样本与企业数据，进行排名计算与差距诊断',
+      modifier: analysisCfg.modifier || 'cta-thinking--analysis',
+      title: analysisCfg.title || '智能体思考中…',
+      doneTitle: analysisCfg.doneTitle || '思考完成',
+      hint:
+        analysisCfg.hint ||
+        '基于已查询的行业样本与企业数据，进行排名计算与差距诊断',
+      collapsible: analysisCfg.collapsible != null ? !!analysisCfg.collapsible : true,
       runningStatus: '分析中…',
       doneStatus: '✓ 已完成',
     });
     return runProcessSteps(wrap, getAnalysisSteps(), {
       runningStatus: '分析中…',
       doneStatus: '✓ 已完成',
-      doneTitle: '思考完成',
-      defaultDelay: 650,
-      startDelay: 400,
+      doneTitle: analysisCfg.doneTitle || '思考完成',
+      defaultDelay: analysisCfg.defaultDelay != null ? analysisCfg.defaultDelay : 650,
+      startDelay: analysisCfg.startDelay != null ? analysisCfg.startDelay : 400,
+      collapseOnDone: !!analysisCfg.collapseOnDone,
     });
   }
 
@@ -1285,6 +1454,12 @@
     lastUserText = text;
     BenchmarkSlotFilling.reset();
     BenchmarkSlotFilling.parseMessage(text);
+    if (
+      window.DemoSceneKernel &&
+      typeof window.DemoSceneKernel.beforeHandle === 'function'
+    ) {
+      window.DemoSceneKernel.beforeHandle(text);
+    }
 
     state.loading = true;
     syncSendBtn();
@@ -1296,6 +1471,12 @@
       return runAnalysisPhase();
     }).then(function () {
       var result = BenchmarkSlotFilling.handleMessage(text);
+      if (
+        window.DemoSceneKernel &&
+        typeof window.DemoSceneKernel.beforeHandle === 'function'
+      ) {
+        window.DemoSceneKernel.beforeHandle(text);
+      }
       if (typeof BenchmarkAgent !== 'undefined') {
         BenchmarkAgent.updateSlotTags();
       }
@@ -1309,7 +1490,23 @@
       }
 
       if (typeof BenchmarkAgent !== 'undefined') {
-        BenchmarkAgent.deliverResult(result);
+        var deliverChat = true;
+        if (
+          window.DemoSceneKernel &&
+          typeof window.DemoSceneKernel.shouldDeliverChatResult === 'function'
+        ) {
+          deliverChat = !!window.DemoSceneKernel.shouldDeliverChatResult(text, result);
+        }
+        if (deliverChat) {
+          BenchmarkAgent.deliverResult(result);
+        }
+      }
+
+      if (
+        window.DemoSceneKernel &&
+        typeof window.DemoSceneKernel.afterResult === 'function'
+      ) {
+        window.DemoSceneKernel.afterResult(text, result);
       }
 
       state.loading = false;

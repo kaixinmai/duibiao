@@ -12,6 +12,40 @@ var BenchmarkResultCard = {
     return this._payloads[chartId] || null;
   },
 
+  getAllPayloads: function () {
+    var out = {};
+    Object.keys(this._payloads).forEach(function (id) {
+      out[id] = this._payloads[id];
+    }.bind(this));
+    return out;
+  },
+
+  restorePayloads: function (map) {
+    if (!map || typeof map !== 'object') return;
+    Object.keys(map).forEach(function (id) {
+      this._payloads[id] = map[id];
+    }.bind(this));
+  },
+
+  /** 会话 HTML 恢复后，按已保存 payload 重新挂载 ECharts */
+  remountChartsInDocument: function (root) {
+    var scope = root || document;
+    var cards = scope.querySelectorAll('.benchmark-result-card[data-chart-id]');
+    var self = this;
+    cards.forEach(function (card) {
+      var chartId = card.getAttribute('data-chart-id');
+      var payload = self.getPayload(chartId);
+      if (!payload) return;
+      var specs = payload.chartSpecs;
+      if ((!specs || !specs.length) && payload.result) {
+        specs = self.getChartSpecs(payload.result, chartId);
+        payload.chartSpecs = specs;
+      }
+      if (!specs || !specs.length) return;
+      self.mountCharts(specs);
+    });
+  },
+
   getChartSpecs: function (result, baseChartId) {
     if (result.charts && result.charts.length) {
       return result.charts.map(function (c, i) {
@@ -92,31 +126,85 @@ var BenchmarkResultCard = {
 
   renderMultiDimTable: function (multiDim) {
     if (!multiDim || !multiDim.rows || !multiDim.rows.length) return '';
-    var trs = multiDim.rows.map(function (r) {
-      return '<tr>' +
-        '<td>' + BenchmarkResultCard.escape(r.metric) + '</td>' +
-        '<td class="is-self"><strong>' + r.self + '</strong> ' + BenchmarkResultCard.escape(r.unit) + '</td>' +
-        '<td>' + r.benchmark + ' ' + BenchmarkResultCard.escape(r.unit) + '</td>' +
-        '<td>' + r.avg + ' ' + BenchmarkResultCard.escape(r.unit) + '</td>' +
-        '<td>' + BenchmarkResultCard.escape(r.gap) + '</td>' +
-      '</tr>';
-    }).join('');
 
-    return '<div class="benchmark-multidim">' +
-      '<div class="benchmark-multidim__title">' + BenchmarkResultCard.escape(multiDim.period) + ' 多维指标对标表</div>' +
-      '<div class="benchmark-result-card__table-wrap">' +
-        '<table class="benchmark-result-card__table benchmark-multidim__table">' +
-          '<thead><tr>' +
-            '<th>指标</th>' +
-            '<th>' + BenchmarkResultCard.escape(multiDim.selfName) + '</th>' +
-            '<th>' + BenchmarkResultCard.escape(multiDim.benchmarkName) + '</th>' +
-            '<th>' + BenchmarkResultCard.escape(multiDim.avgName) + '</th>' +
-            '<th>研判</th>' +
-          '</tr></thead>' +
-          '<tbody>' + trs + '</tbody>' +
-        '</table>' +
-      '</div>' +
-    '</div>';
+    var robotSvg =
+      '<svg class="bm-robot-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" title="污碳模型推演">' +
+      '<rect x="6" y="8" width="12" height="10" rx="2" fill="currentColor"/>' +
+      '<circle cx="9.5" cy="12.5" r="1.2" fill="#fff"/>' +
+      '<circle cx="14.5" cy="12.5" r="1.2" fill="#fff"/>' +
+      '<path d="M12 4v3M9 5h6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+      '</svg>';
+
+    function isCloudMetric(metric) {
+      return /钢材产量|碳排放量|碳排放强度/.test(String(metric || ''));
+    }
+
+    var trs = multiDim.rows
+      .map(function (r) {
+        var cloud = isCloudMetric(r.metric);
+        var selfCell =
+          '<td class="bm-self-cell">' +
+          '<strong>' +
+          r.self +
+          '</strong> ' +
+          BenchmarkResultCard.escape(r.unit) +
+          '<span class="bm-source-tag bm-source-tag--local">本地库</span>' +
+          (cloud
+            ? '<span class="bm-source-tag bm-source-tag--cloud" title="佳华双碳云图 · 绿色低碳管理平台">' +
+              robotSvg +
+              '云图推演</span>'
+            : '') +
+          '</td>';
+        return (
+          '<tr>' +
+          '<td>' +
+          BenchmarkResultCard.escape(r.metric) +
+          '</td>' +
+          selfCell +
+          '<td>' +
+          r.benchmark +
+          ' ' +
+          BenchmarkResultCard.escape(r.unit) +
+          '</td>' +
+          '<td>' +
+          r.avg +
+          ' ' +
+          BenchmarkResultCard.escape(r.unit) +
+          '</td>' +
+          '<td class="bm-gap-cell">' +
+          BenchmarkResultCard.escape(r.gap) +
+          '</td>' +
+          '</tr>'
+        );
+      })
+      .join('');
+
+    return (
+      '<div class="benchmark-multidim">' +
+      '<div class="benchmark-multidim__title">' +
+      BenchmarkResultCard.escape(multiDim.period) +
+      ' 多维指标对标表</div>' +
+      '<p class="benchmark-multidim__hint">企业列以本地库为准；产量 / 碳排放 / 强度同步对照佳华双碳云图推演（绿标 + 机器人）。</p>' +
+      '<div class="benchmark-result-card__table-wrap benchmark-multidim__wrap">' +
+      '<table class="benchmark-result-card__table benchmark-multidim__table">' +
+      '<thead><tr>' +
+      '<th>指标</th>' +
+      '<th>' +
+      BenchmarkResultCard.escape(multiDim.selfName) +
+      '</th>' +
+      '<th>' +
+      BenchmarkResultCard.escape(multiDim.benchmarkName) +
+      '</th>' +
+      '<th>' +
+      BenchmarkResultCard.escape(multiDim.avgName) +
+      '</th>' +
+      '<th>研判</th>' +
+      '</tr></thead>' +
+      '<tbody>' +
+      trs +
+      '</tbody>' +
+      '</table></div></div>'
+    );
   },
 
   renderRecommendations: function (tips) {
@@ -147,7 +235,13 @@ var BenchmarkResultCard = {
     var trs = dataRows.map(function (row, idx) {
       var noteCell;
       if (row.isSelf) {
-        noteCell = '河南钢铁集团';
+        var selfName =
+          (typeof BenchmarkDataService !== 'undefined' &&
+            BenchmarkDataService.DISPLAY &&
+            BenchmarkDataService.DISPLAY.SELF) ||
+          (typeof HenanSteelData !== 'undefined' && HenanSteelData.enterpriseName) ||
+          '本企业';
+        noteCell = selfName;
       } else if (row.isBenchmark) {
         noteCell = '<span class="benchmark-table-ref">' +
           '<span class="benchmark-table-ref__label">对标参考</span>' +
