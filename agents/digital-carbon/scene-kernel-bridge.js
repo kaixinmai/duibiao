@@ -929,7 +929,62 @@
         ? profile.steelOutput
         : Math.round((profile.steelOutput / 12) * 10) / 10;
 
-      if (adj) {
+      // 企业层级强度一律以数据包最新底数为准（含对话修正），不再沿用首次 rankingMeta
+      if (profile && profile.co2Intensity != null) {
+        var liveIntensity = Number(profile.co2Intensity);
+        // 对话修正写入的是绝对值；上传材料校正才叠加 intensityAdj
+        if (adj && profile.source !== 'chat-revision') {
+          liveIntensity = Math.round((liveIntensity + adj) * 10000) / 10000;
+        } else {
+          liveIntensity = Math.round(liveIntensity * 10000) / 10000;
+        }
+        model.enterpriseIntensity = liveIntensity;
+
+        var provinceAvg = Number(model.provinceAvg) || 1.977;
+        var industryAvg = Number(model.industryAvg) || 1.95;
+        var industryAdvanced = Number(model.industryAdvanced) || 1.901;
+        var gapToAdvanced = Math.round((liveIntensity - industryAdvanced) * 1000) / 1000;
+        var betterThanProvince = Math.round((provinceAvg - liveIntensity) * 1000) / 1000;
+        var betterThanIndustry = Math.round((industryAvg - liveIntensity) * 1000) / 1000;
+        var rank = model.enterpriseRank || 1;
+        var total = model.totalEnterprises || 232;
+        model.enterpriseAnalysis =
+          gapToAdvanced > 0
+            ? '企业层级碳排放强度为 ' +
+              liveIntensity +
+              ' tCO₂/t，优于' +
+              model.provinceName +
+              '省均值（' +
+              provinceAvg +
+              ' tCO₂/t，低 ' +
+              betterThanProvince +
+              '）与全国行业均值（' +
+              industryAvg +
+              ' tCO₂/t，低 ' +
+              betterThanIndustry +
+              '），在纳入全国碳市场的约 ' +
+              total +
+              ' 家长流程钢铁企业中排名第 ' +
+              rank +
+              ' 位。相较行业先进值 ' +
+              industryAdvanced +
+              ' tCO₂/t，仍高出约 ' +
+              gapToAdvanced +
+              ' tCO₂/t。' +
+              (data.learningNotes && data.learningNotes.length
+                ? '本版已按对话补充 / 上传材料完成指标修订。'
+                : '')
+            : '企业层级碳排放强度为 ' +
+              liveIntensity +
+              ' tCO₂/t，已优于' +
+              model.provinceName +
+              '省均值、行业均值及行业先进值，排名第 ' +
+              rank +
+              ' 位。' +
+              (data.learningNotes && data.learningNotes.length
+                ? '本版已按对话补充 / 上传材料完成指标修订。'
+                : '');
+      } else if (adj) {
         model.enterpriseIntensity =
           Math.round((Number(model.enterpriseIntensity) + adj) * 1000) / 1000;
       }

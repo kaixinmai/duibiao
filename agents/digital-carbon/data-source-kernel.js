@@ -727,9 +727,19 @@
       lastRevisionSummary = revisionResult;
     }
 
+    var profile = pack.getPeriod(period);
+    // 把对话修正同步进 result.rankingMeta，避免报告仍读首次查询缓存
+    var resultForReport = result ? Object.assign({}, result) : {};
+    var rankingMeta = Object.assign({}, (result && result.rankingMeta) || {});
+    if (profile && profile.co2Intensity != null) {
+      rankingMeta.intensity = profile.co2Intensity;
+    }
+    resultForReport.rankingMeta = rankingMeta;
+    resultForReport.slots = slots;
+
     var chartId = 'jsl-report-' + Date.now();
     var payload = {
-      result: result,
+      result: resultForReport,
       period: period,
       userText: text,
       timeDimension: timeDimension,
@@ -755,7 +765,7 @@
 
     lastReportMeta = {
       chartId: chartId,
-      period: String(period).slice(0, 4),
+      period: String(period),
       timeDimension: timeDimension || 'yearly',
     };
     persistReportMeta(lastReportMeta);
