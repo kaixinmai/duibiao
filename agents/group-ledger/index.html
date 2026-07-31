@@ -14,19 +14,23 @@
   <link rel="stylesheet" href="../../white-green-ui-kit/css/cta-shell-green.css" />
   <style>
     .demo-scene-back {
-      position: fixed; top: 14px; left: 16px; z-index: 40;
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 14px; border-radius: 10px;
-      border: 1px solid #d8ece2; background: #fff;
-      color: #00b86b; font-size: 15px; font-weight: 600;
-      text-decoration: none; box-shadow: 0 4px 14px rgba(0,184,107,.1);
+      display: inline-flex;
+      align-items: center;
+      margin: 0 0 8px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: #667085;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.2;
+      text-decoration: none;
+      box-shadow: none;
     }
-    .demo-scene-back:hover { background: #ddf8eb; }
-    .cta-header { padding-left: 180px; }
+    .demo-scene-back:hover { color: #00b86b; background: transparent; }
   </style>
 </head>
 <body>
-  <a class="demo-scene-back" id="demo-scene-back" href="../../index.html">← 返回</a>
   <div class="cta-shell">
     <header class="cta-header">
       <div class="cta-header__spacer"></div>
@@ -38,6 +42,7 @@
       <div class="cta-history-backdrop" id="cta-history-backdrop"></div>
       <aside class="cta-history" id="cta-history">
         <div class="cta-history__brand">
+          <a class="demo-scene-back" id="demo-scene-back" href="../../index.html">← 返回</a>
           <div class="cta-history__brand-title">智能体</div>
           <p class="cta-history__brand-desc">场景专属智能体对话</p>
         </div>

@@ -43,16 +43,20 @@ html, body {
 .ld-top__back {
   position: absolute;
   left: 0;
-  top: 8px;
+  top: 10px;
   appearance: none;
-  border: 1px solid var(--ld-border);
-  background: rgba(8, 28, 56, 0.8);
-  color: var(--ld-cyan);
-  font-size: 15px;
+  border: none;
+  background: transparent;
+  color: var(--ld-muted);
+  font-size: 12px;
   font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 8px;
+  padding: 2px 0;
+  border-radius: 0;
   text-decoration: none;
+}
+
+.ld-top__back:hover {
+  color: var(--ld-cyan);
 }
 
 .ld-top__title {

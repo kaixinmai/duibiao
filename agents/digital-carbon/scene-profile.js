@@ -10,7 +10,7 @@ window.DemoSceneProfile = {
   avatarSrc: '../../assets/agent-jiajia.png',
   avatarFallback: '碳',
   backHref: '../../cockpit.html',
-  backLabel: '← 返回数字碳表驾驶舱',
+  backLabel: '← 返回驾驶舱',
   placeholder: '请输入数字碳表相关问题，如：查询本月粗钢碳排放强度全国排名',
   welcomeHint: '数字碳表常见问题，点击即可提问',
   quickStartHint: '典型数字碳表分析场景，一键进入',

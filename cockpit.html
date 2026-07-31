@@ -8,11 +8,12 @@
   <link rel="stylesheet" href="./demo-agent-entry.css" />
 </head>
 <body>
-  <a class="ck-btn ck-back" href="./index.html">← 返回场景选择</a>
-
   <div class="ck">
     <header class="ck-header">
-      <div class="ck-header__time" id="ck-clock">--:--:--  ----.--.--</div>
+      <div class="ck-header__left">
+        <a class="ck-back" href="./index.html">← 返回</a>
+        <div class="ck-header__time" id="ck-clock">--:--:--  ----.--.--</div>
+      </div>
       <h1 class="ck-header__title">碳排放及碳资产管理平台</h1>
       <div class="ck-header__right">
         <a class="ck-btn" href="./index.html">进入系统</a>
@@ -67,7 +68,10 @@
           </article>
         </div>
         <div class="ck-hero" role="img" aria-label="钢铁企业厂区实景">
-          <p class="ck-hero__hint">钢铁企业厂区实景 · 点击左下角智能体开始问答</p>
+          <a class="demo-agent demo-agent--cockpit" href="./agent.html" title="打开数字碳表智能体">
+            <img class="demo-agent__avatar" src="./assets/agent-jiajia-still.png?v=3" alt="数字碳表智能体" />
+            <span class="demo-agent__bubble">你好，我是数字碳表智能体，有问题问我吧~</span>
+          </a>
         </div>
       </section>
 
@@ -107,11 +111,6 @@
       </aside>
     </div>
   </div>
-
-  <a class="demo-agent" href="./agents/digital-carbon/" title="打开数字碳表智能体">
-    <img class="demo-agent__avatar" src="./assets/agent-jiajia.png" alt="数字碳表智能体" />
-    <span class="demo-agent__bubble">你好，我是数字碳表智能体，有问题问我吧~</span>
-  </a>
 
   <script src="./vendor/echarts.min.js"></script>
   <script src="./cockpit.js"></script>

@@ -10,7 +10,7 @@ window.DemoSceneProfile = {
   avatarSrc: '../../assets/agent-jiajia.png',
   avatarFallback: '账',
   backHref: '../../ledger.html',
-  backLabel: '← 返回集团碳账本大屏',
+  backLabel: '← 返回大屏',
   placeholder: '请输入集团碳账本相关问题，如：对比山东与新疆区域碳排放差距',
   welcomeHint: '集团碳账本常见问题，点击即可提问',
   quickStartHint: '典型集团账本分析场景，一键进入',
