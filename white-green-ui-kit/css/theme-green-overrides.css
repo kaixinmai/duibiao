@@ -1,0 +1,361 @@
+/**
+ * 子应用 / iframe / 企业·生态·发改委详情 · 白绿主题覆盖层
+ * 通过 <link href="/shared/theme-green-overrides.css"> 注入
+ */
+:root {
+  --gc-primary: #00b86b;
+  --gc-primary-hover: #00995a;
+  --gc-primary-selected-text: #00a866;
+  --gc-secondary: #22c7a3;
+  --gc-soft: #ddf8eb;
+  --gc-soft-2: #f0f8f4;
+  /* 页面底：用更易辨认的薄荷绿（#f5faf7 肉眼近纯白） */
+  --gc-bg: #eef6f1;
+  --gc-card: #ffffff;
+  --gc-module: #e7f3ec;
+  --gc-border: #d8ece2;
+  --gc-text: #101828;
+  --gc-text-body: #475467;
+  --gc-text-muted: #98a2b3;
+  --gc-shadow: 0 4px 20px rgba(0, 184, 107, 0.08);
+  --gc-radius: 12px;
+  --gc-gradient: linear-gradient(90deg, #00b86b 0%, #22c7a3 100%);
+
+  /* 常见子应用 token 重映射 */
+  --cta-bg-deep: var(--gc-bg);
+  --cta-bg-mid: var(--gc-module);
+  --cta-bg-sidebar: var(--gc-card);
+  --cta-card-bg: var(--gc-card);
+  --cta-border: var(--gc-border);
+  --cta-accent: var(--gc-primary);
+  --cta-accent-2: var(--gc-secondary);
+  --cta-glow-blue: rgba(0, 184, 107, 0.18);
+  --cta-text-primary: var(--gc-text);
+  --cta-text-secondary: var(--gc-text-body);
+  --cta-text-muted: var(--gc-text-muted);
+
+  --sys-bg-deep: var(--gc-bg);
+  --sys-bg-mid: var(--gc-module);
+  --sys-card-bg: var(--gc-card);
+  --sys-border: var(--gc-border);
+  --sys-accent: var(--gc-primary);
+  --sys-glow-blue: rgba(0, 184, 107, 0.16);
+  --sys-text-primary: var(--gc-text);
+  --sys-text-muted: var(--gc-text-muted);
+
+  --pp-bg: var(--gc-bg);
+  --pp-card: var(--gc-card);
+  --pp-border: var(--gc-border);
+  --pp-accent: var(--gc-primary);
+  --pp-text: var(--gc-text);
+  --pp-muted: var(--gc-text-muted);
+  --pp-text-primary: var(--gc-text);
+  --pp-text-muted: var(--gc-text-muted);
+
+  --portal-bg: var(--gc-bg);
+  --portal-card: var(--gc-card);
+  --portal-accent: var(--gc-primary);
+  --shell-bg: var(--gc-bg);
+  --primary: var(--gc-primary);
+  --bm-primary: var(--gc-primary);
+  --accent: var(--gc-primary);
+  --brand: var(--gc-primary);
+  --color-primary: var(--gc-primary);
+  --color-accent: var(--gc-secondary);
+  --lc-primary: var(--gc-primary);
+  --lc-accent: var(--gc-secondary);
+  --lc-bg: var(--gc-bg);
+  --lc-card: var(--gc-card);
+  --lc-border: var(--gc-border);
+  --lc-text: var(--gc-text);
+}
+
+html:has(.cta-shell),
+html:has(.pp-shell),
+html:has(.agent-detail),
+html:has(.agent-chat),
+html:has(.carbon-target-shell),
+html:has(.carbon-agent),
+body:has(.cta-shell),
+body:has(.pp-shell),
+body:has(.agent-detail),
+body:has(.agent-chat),
+body:has(.carbon-target-shell),
+body:has(.carbon-agent),
+#root:has(.cta-shell),
+#app:has(.cta-shell) {
+  background: var(--gc-bg) !important;
+  color: var(--gc-text-body) !important;
+}
+
+/* 独立 SPA 入口（碳足迹等）无上述壳类时仍铺白绿底 */
+html.gc-detail-root,
+body.gc-detail-root,
+#root.gc-detail-root {
+  background: var(--gc-bg) !important;
+  color: var(--gc-text-body) !important;
+}
+
+/* 通用壳 / 侧栏 / 主区 */
+.cta-shell,
+.cta-body,
+.cta-main,
+.cta-history,
+.pp-shell,
+.pp-layout,
+.agent-portal-layout,
+.agent-portal-main,
+.agent-home-layout,
+.agent-home-content,
+.agent-stars,
+.agent-detail,
+.agent-detail-layout,
+.agent-chat,
+.agent-chat-layout,
+.carbon-target-shell,
+.carbon-trading-shell,
+.benchmark-shell,
+.supply-chain-shell,
+.portal-shell,
+.lc-shell,
+.lc-page,
+.lc-main {
+  background: var(--gc-bg) !important;
+  color: var(--gc-text-body) !important;
+}
+
+.cta-history,
+.pp-sidebar,
+.agent-sidebar,
+aside.agent-sidebar,
+.lc-sidebar,
+.portal-sidebar {
+  background: var(--gc-card) !important;
+  border-color: var(--gc-border) !important;
+  color: var(--gc-text-body) !important;
+}
+
+.cta-history__item.is-active,
+.pp-nav__item.is-active,
+.agent-sidebar .active,
+.agent-sidebar [aria-current="page"],
+.lc-nav__item.is-active,
+.lc-tab.is-active {
+  background: var(--gc-soft) !important;
+  color: var(--gc-primary-selected-text) !important;
+}
+
+/* 卡片 / 面板 / 详情块 */
+.cta-scenario,
+.cta-faq,
+.cta-welcome__panel,
+.cta-msg__bubble,
+.pp-msg__bubble,
+.pp-card,
+.agent-cap-card,
+.agent-result-card,
+.capability-agent-card,
+.gc-card,
+.card,
+.panel,
+.panel-card,
+.detail-card,
+.result-card,
+.report-card,
+.kpi-card,
+.stat-card,
+.module-card,
+.scenario-card,
+.agent-panel,
+.chat-panel,
+.message-bubble,
+.msg-bubble,
+.ac-card,
+.bm-card,
+.lc-card,
+.portal-card {
+  background: var(--gc-card) !important;
+  border-color: var(--gc-border) !important;
+  color: var(--gc-text) !important;
+  box-shadow: var(--gc-shadow);
+}
+
+.capability-agent-card,
+.pp-card,
+.agent-cap-card,
+.gc-card,
+.lc-card,
+.portal-card,
+.bm-card,
+.ac-card {
+  border: 1px solid var(--gc-border) !important;
+  border-radius: var(--gc-radius) !important;
+}
+
+.capability-agent-card__title,
+.pp-card__title,
+.agent-cap-card__title,
+.card-title,
+.panel-title,
+h1, h2, h3, h4 {
+  color: var(--gc-text) !important;
+  text-shadow: none !important;
+}
+
+.capability-agent-card__desc,
+.capability-agent-card__category,
+.pp-card__desc,
+.agent-cap-card__desc,
+.card-desc,
+.muted,
+.text-muted,
+.subtitle {
+  color: var(--gc-text-body) !important;
+}
+
+.capability-agent-card__tag,
+.capability-agent-card__ai-chip,
+.tag,
+.chip,
+.badge-soft {
+  background: var(--gc-soft) !important;
+  color: var(--gc-primary) !important;
+  border-color: var(--gc-border) !important;
+}
+
+/* 输入 */
+.cta-input-bar textarea,
+#cta-input,
+#pp-input,
+.agent-input-wrap textarea,
+.pp-input-box textarea,
+.chat-input textarea,
+.agent-chat-input textarea,
+textarea,
+input[type="text"],
+input[type="search"],
+.el-input__inner,
+.ant-input {
+  background: var(--gc-card) !important;
+  border-color: var(--gc-border) !important;
+  color: var(--gc-text) !important;
+}
+
+.cta-input-bar textarea:focus,
+#cta-input:focus,
+#pp-input:focus,
+.agent-input-wrap textarea:focus,
+textarea:focus,
+input:focus {
+  border-color: var(--gc-primary) !important;
+  box-shadow: 0 0 0 3px rgba(0, 184, 107, 0.15) !important;
+}
+
+/* 按钮 */
+#cta-send,
+#pp-send,
+.cta-send,
+.agent-action-btn.primary,
+.agent-enter-system-btn,
+button.primary,
+.btn-primary,
+.el-button--primary,
+.ant-btn-primary,
+.lc-btn--primary,
+.ac-btn-primary {
+  background: var(--gc-primary) !important;
+  border-color: var(--gc-primary) !important;
+  color: #fff !important;
+}
+
+#cta-send:hover,
+.agent-action-btn.primary:hover,
+.btn-primary:hover,
+.el-button--primary:hover {
+  background: var(--gc-primary-hover) !important;
+  border-color: var(--gc-primary-hover) !important;
+}
+
+/* 链接 / 强调色 */
+a,
+.link,
+.text-primary,
+.text-accent,
+.accent {
+  color: var(--gc-primary);
+}
+
+/* 欢迎标题强调色（实心主绿，避免 clip/透明字反绿） */
+.cta-welcome__accent,
+.cta-welcome__headline .accent,
+.pp-welcome__accent,
+.cta-welcome__greeting .accent,
+.title-gradient,
+.gradient-text {
+  background: none !important;
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  color: var(--gc-primary) !important;
+  -webkit-text-fill-color: var(--gc-primary) !important;
+}
+
+.cta-welcome__headline,
+.cta-welcome__greeting,
+.pp-welcome__greeting,
+.cta-sidebar__title,
+.pp-sidebar__title {
+  color: var(--gc-text) !important;
+  -webkit-text-fill-color: var(--gc-text) !important;
+  text-shadow: none !important;
+  background: none !important;
+  background-image: none !important;
+}
+
+/* Tab / 选中态 */
+.tab.active,
+.tabs .active,
+.nav-item.active,
+[aria-selected="true"],
+.is-active:not(button.primary) {
+  color: var(--gc-primary-selected-text) !important;
+}
+
+/* 弱化深蓝霓虹装饰 */
+[class*="glow"],
+[class*="neon"],
+[class*="grid-bg"],
+.cta-main__bg-glow,
+.cta-main__bg-grid,
+.cta-main__bg-scan,
+.starfield,
+.tech-grid,
+.bg-grid {
+  opacity: 0.22 !important;
+  filter: hue-rotate(85deg) saturate(0.55);
+}
+
+/* 表格 */
+table th,
+.table-header,
+.el-table th,
+.ant-table-thead > tr > th {
+  background: var(--gc-soft-2) !important;
+  color: var(--gc-text) !important;
+  border-color: var(--gc-border) !important;
+}
+
+table td,
+.el-table td,
+.ant-table-tbody > tr > td {
+  border-color: var(--gc-border) !important;
+  color: var(--gc-text-body) !important;
+}
+
+/* 图表容器底 */
+.chart-box,
+.echarts-container,
+.chart-panel {
+  background: var(--gc-card) !important;
+  border-color: var(--gc-border) !important;
+}

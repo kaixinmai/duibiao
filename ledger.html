@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>集团碳账本演示 · 双碳智服平台</title>
+  <link rel="stylesheet" href="./ledger.css" />
+  <link rel="stylesheet" href="./demo-agent-entry.css" />
+</head>
+<body>
+  <div class="ld">
+    <header class="ld-top">
+      <a class="ld-top__back" href="./index.html">← 返回</a>
+      <h1 class="ld-top__title">集团双碳智服平台</h1>
+      <nav class="ld-nav" aria-label="功能导航">
+        <span class="ld-nav__item is-active">数据总览</span>
+        <span class="ld-nav__item">排放管理</span>
+        <span class="ld-nav__item">资产管理</span>
+        <span class="ld-nav__item">循环经济</span>
+        <span class="ld-nav__item">实时监测</span>
+        <span class="ld-nav__item">经营数据</span>
+      </nav>
+      <div class="ld-year">2025 年</div>
+    </header>
+
+    <div class="ld-body">
+      <aside class="ld-col">
+        <section class="ld-panel">
+          <h2 class="ld-panel__title">区域碳排放数据</h2>
+          <p class="ld-meta">纳入企业总数：<strong style="color:#3dd68c">20</strong></p>
+          <div class="ld-region" id="ld-regions"></div>
+        </section>
+        <section class="ld-panel ld-panel--grow">
+          <h2 class="ld-panel__title">行业碳排放数据</h2>
+          <div class="ld-industries" id="ld-industries"></div>
+        </section>
+      </aside>
+
+      <section class="ld-center">
+        <div class="ld-kpis">
+          <article class="ld-kpi">
+            <p class="ld-kpi__value">6145.00</p>
+            <p class="ld-kpi__label">集团碳排放总量<br />万 tCO₂</p>
+          </article>
+          <article class="ld-kpi">
+            <p class="ld-kpi__value">5919.63</p>
+            <p class="ld-kpi__label">电厂碳排放量<br />万 tCO₂</p>
+          </article>
+          <article class="ld-kpi">
+            <p class="ld-kpi__value">6109.63</p>
+            <p class="ld-kpi__label">电厂预计配额<br />万 tCO₂</p>
+          </article>
+          <article class="ld-kpi">
+            <p class="ld-kpi__value">190.00</p>
+            <p class="ld-kpi__label">上月缺口预估<br />万 tCO₂</p>
+          </article>
+        </div>
+        <div class="ld-map" aria-label="集团布局示意地图">
+          <svg class="ld-map__svg" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="cnFill" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1a6fd4" stop-opacity="0.55"/>
+                <stop offset="100%" stop-color="#0d3d7a" stop-opacity="0.85"/>
+              </linearGradient>
+            </defs>
+            <!-- 简化中国轮廓示意（演示用，非测绘精确） -->
+            <path fill="url(#cnFill)" stroke="#40a8ff" stroke-width="2"
+              d="M210,120 L280,90 L360,70 L450,85 L520,70 L580,95 L620,140 L650,190 L670,250 L655,310 L630,360 L600,410 L560,455 L500,485 L440,500 L380,490 L330,470 L290,430 L250,390 L220,340 L195,290 L185,230 L195,170 Z" />
+            <path fill="none" stroke="rgba(64,168,255,0.35)" stroke-width="1"
+              d="M250,180 L320,160 L400,150 L480,165 L540,190 L580,240 L560,300 L520,340 L460,360 L400,350 L340,320 L290,270 Z" />
+          </svg>
+          <span class="ld-map__pin" style="left:58%;top:42%"></span>
+          <span class="ld-map__pin" style="left:48%;top:50%"></span>
+          <span class="ld-map__pin" style="left:38%;top:46%"></span>
+          <span class="ld-map__pin" style="left:52%;top:58%"></span>
+          <span class="ld-map__pin" style="left:62%;top:62%"></span>
+          <span class="ld-map__pin" style="left:44%;top:62%"></span>
+          <a class="demo-agent demo-agent--dark demo-agent--ledger" href="./agents/group-ledger/" title="打开双碳智能体">
+            <img class="demo-agent__avatar" src="./assets/agent-jiajia-still.png?v=3" alt="双碳智能体" />
+            <span class="demo-agent__bubble">你好，我是双碳智能体，有问题问我吧~</span>
+          </a>
+        </div>
+      </section>
+
+      <aside class="ld-col">
+        <section class="ld-panel">
+          <h2 class="ld-panel__title">碳市场资产</h2>
+          <div class="ld-asset-grid">
+            <div class="ld-asset-row"><span>当前配额持有</span><strong>****</strong></div>
+            <div class="ld-asset-row"><span>资产估值</span><strong>****</strong></div>
+            <div class="ld-asset-row"><span>累计成交量</span><strong>128.6 万吨</strong></div>
+            <div class="ld-asset-row"><span>本年买入量</span><strong>36.2 万吨</strong></div>
+            <div class="ld-asset-row"><span>本年卖出量</span><strong>18.4 万吨</strong></div>
+          </div>
+        </section>
+        <section class="ld-panel ld-panel--grow">
+          <h2 class="ld-panel__title">双碳资讯</h2>
+          <ul class="ld-news">
+            <li><span>全国碳市场扩围行业履约准备要点解读</span><span class="ld-news__date">2026-07-28</span></li>
+            <li><span>电力企业碳配额缺口预警与交易策略观察</span><span class="ld-news__date">2026-07-22</span></li>
+            <li><span>集团级碳账本数据治理与存证实践分享</span><span class="ld-news__date">2026-07-15</span></li>
+            <li><span>绿电绿证与碳资产协同管理最新进展</span><span class="ld-news__date">2026-07-08</span></li>
+            <li><span>区域碳排放强度对标与减碳路径研究</span><span class="ld-news__date">2026-07-01</span></li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script src="./ledger.js"></script>
+</body>
+</html>

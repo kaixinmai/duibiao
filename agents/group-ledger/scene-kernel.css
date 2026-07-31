@@ -1,0 +1,670 @@
+/* 集团碳账本欢迎页：搜索对话框 + 能力瓷砖（样式对齐数字碳表枢纽） */
+.gl-kernel-panel {
+  width: min(820px, 100%);
+  margin: 20px auto 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  text-align: left;
+}
+
+.gl-kernel-dialog {
+  margin-bottom: 18px;
+}
+
+.gl-kernel-dialog__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.gl-kernel-dialog__box {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border: 1px solid #d8ece2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(0, 120, 70, 0.09);
+  overflow: visible;
+  min-height: 72px;
+}
+
+.gl-kernel-dialog__box input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 18px 20px;
+  border: 0;
+  border-radius: 18px 0 0 18px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #101828;
+  background: transparent;
+  font-family: inherit;
+}
+
+.gl-kernel-dialog__box input:focus {
+  outline: none;
+}
+
+.gl-kernel-dialog__box:focus-within {
+  border-color: #00b86b;
+  box-shadow: 0 0 0 3px rgba(0, 184, 107, 0.12), 0 12px 32px rgba(0, 120, 70, 0.09);
+}
+
+.gl-kernel-dialog__go {
+  appearance: none;
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 10px;
+  padding: 0 20px;
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #00b86b;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gl-kernel-dialog__go:hover {
+  background: #00995a;
+}
+
+.gl-kernel-suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 12;
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid #d8ece2;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(16, 24, 40, 0.14);
+}
+
+.gl-kernel-suggest__item {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 0;
+  border-bottom: 1px solid #eef4f0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gl-kernel-suggest__item:last-child {
+  border-bottom: 0;
+}
+
+.gl-kernel-suggest__item:hover {
+  background: #f0faf4;
+}
+
+.gl-kernel-suggest__item strong {
+  font-size: 14px;
+  color: #101828;
+}
+
+.gl-kernel-suggest__item span {
+  font-size: 12px;
+  color: #667085;
+  white-space: nowrap;
+}
+
+.gl-kernel-suggest__empty {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #667085;
+}
+
+.gl-kernel-current {
+  margin: 10px 4px 0;
+  font-size: 13px;
+  color: #667085;
+}
+
+.gl-kernel-current strong {
+  color: #00b86b;
+  font-weight: 700;
+}
+
+.gl-kernel-current__scope {
+  color: #98a2b3;
+}
+
+.gl-kernel-caps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.gl-kernel-cap {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  min-height: 92px;
+  padding: 14px 14px 12px;
+  border: 1px solid #dceee5;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #344054;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.04);
+}
+
+.gl-kernel-cap:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(16, 24, 40, 0.08);
+}
+
+.gl-kernel-cap__title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #101828;
+}
+
+.gl-kernel-cap__hint {
+  font-size: 12px;
+  color: #667085;
+  line-height: 1.4;
+}
+
+.gl-kernel-cap--qa,
+.gl-kernel-cap--qa.is-active {
+  border-color: #9fe0c2;
+  background: linear-gradient(180deg, #f3fcf7, #ffffff);
+  color: #067647;
+}
+
+.gl-kernel-cap--qa .gl-kernel-cap__hint {
+  color: #099250;
+}
+
+.gl-kernel-cap--bench,
+.gl-kernel-cap--bench.is-active {
+  border-color: #f0d48a;
+  background: linear-gradient(180deg, #fffbf0, #ffffff);
+  color: #93370d;
+}
+
+.gl-kernel-cap--bench .gl-kernel-cap__hint {
+  color: #b54708;
+}
+
+.gl-kernel-cap.is-active {
+  box-shadow: 0 0 0 2px rgba(0, 184, 107, 0.28), 0 10px 22px rgba(16, 24, 40, 0.08);
+}
+
+.gl-kernel-cap--bench.is-active {
+  box-shadow: 0 0 0 2px rgba(183, 129, 5, 0.28), 0 10px 22px rgba(16, 24, 40, 0.08);
+}
+
+.gl-kernel-cap.is-active:not(.gl-kernel-cap--qa):not(.gl-kernel-cap--bench) {
+  background: #e8f8f0;
+  border-color: #00b86b;
+  color: #00995a;
+}
+
+/* —— 对话壳层布局（对齐数字碳表 dual-carbon-hub） —— */
+.cta-shell .cta-main {
+  position: relative;
+}
+
+.cta-shell .cta-main__scroll {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 28px 16px !important;
+  box-sizing: border-box;
+}
+
+.cta-shell .cta-main__scroll > * {
+  width: min(960px, 100%);
+  max-width: 960px;
+  box-sizing: border-box;
+}
+
+.cta-shell .cta-input-bar {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.cta-shell .cta-input-bar > * {
+  width: min(960px, 100%);
+  max-width: 960px;
+  box-sizing: border-box;
+}
+
+/* 能力入口已在欢迎区，隐藏底部快速开始 */
+.cta-input-bar .cta-quick-start {
+  display: none !important;
+}
+
+.cta-input-bar .agent-copilot-input__icon-btn[title="上传附件"] {
+  color: #00b86b;
+}
+
+/* —— 信息分析及检索 · 整体可折叠（同步数字碳表） —— */
+.cta-thinking__head.is-foldable {
+  cursor: pointer;
+  user-select: none;
+  border-radius: 8px;
+  margin: -4px -6px 8px;
+  padding: 8px 6px 10px;
+}
+
+.cta-thinking__head.is-foldable:hover {
+  background: rgba(16, 24, 40, 0.03);
+}
+
+.cta-thinking.is-collapsed .cta-thinking__head.is-foldable {
+  margin-bottom: 0;
+  padding-bottom: 8px;
+  border-bottom: 0;
+}
+
+.cta-thinking__fold {
+  appearance: none;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #98a2b3;
+  font-size: 16px;
+  line-height: 1;
+  cursor: inherit;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(90deg);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.cta-thinking__head.is-foldable:hover .cta-thinking__fold {
+  color: #475467;
+}
+
+.cta-thinking.is-collapsed .cta-thinking__fold {
+  transform: rotate(0deg);
+}
+
+.cta-thinking.is-collapsed .cta-thinking__body {
+  display: none;
+}
+
+.cta-thinking.is-collapsed .cta-thinking__head {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* —— 关键词检索 / 资料折叠（同步数字碳表） —— */
+.cta-thinking--kw-compact .cta-thinking__hint {
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.cta-thinking--kw-compact .cta-thinking__step .cta-thinking__preview-slot {
+  margin-top: 8px;
+}
+
+.jsl-kw-chips,
+.gl-kw-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 4px;
+}
+
+.jsl-kw-chip,
+.gl-kw-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #d0d5dd;
+  background: #f9fafb;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.jsl-kw-search,
+.gl-kw-search {
+  margin: 2px 0 0;
+}
+
+.jsl-kw-toggle,
+.gl-kw-toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #101828;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.55;
+  cursor: pointer;
+  text-align: left;
+}
+
+.jsl-kw-toggle:hover,
+.gl-kw-toggle:hover {
+  color: #0b6e3a;
+}
+
+.jsl-kw-chevron,
+.gl-kw-chevron {
+  display: inline-block;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  color: #667085;
+  transform: translateY(1px);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.jsl-kw-search.is-open .jsl-kw-chevron,
+.gl-kw-search.is-open .gl-kw-chevron {
+  transform: rotate(90deg) translateX(1px);
+}
+
+.jsl-kw-body,
+.gl-kw-body {
+  display: none;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  background: #fafbfc;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.jsl-kw-search.is-open .jsl-kw-body,
+.gl-kw-search.is-open .gl-kw-body {
+  display: block;
+}
+
+.jsl-kw-section + .jsl-kw-section,
+.gl-kw-section + .gl-kw-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #e4e7ec;
+}
+
+.jsl-kw-section-title,
+.gl-kw-section-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475467;
+  letter-spacing: 0.02em;
+}
+
+.jsl-kw-section-title--green,
+.gl-kw-section-title--green {
+  color: #0b6e3a;
+}
+
+.jsl-kw-link-list,
+.jsl-kw-plat-list,
+.gl-kw-link-list,
+.gl-kw-plat-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jsl-kw-link-item,
+.gl-kw-link-item {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.jsl-kw-idx,
+.gl-kw-idx {
+  flex-shrink: 0;
+  color: #98a2b3;
+  min-width: 1.6em;
+}
+
+.jsl-kw-link,
+.gl-kw-link {
+  color: #2563eb;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.jsl-kw-link:hover,
+.gl-kw-link:hover {
+  text-decoration: underline;
+}
+
+.jsl-kw-plat-item,
+.gl-kw-plat-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0 0 7px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #344054;
+}
+
+.jsl-kw-plat-item.is-green,
+.gl-kw-plat-item.is-green {
+  color: #0b6e3a;
+  font-weight: 600;
+}
+
+.jsl-kw-robot,
+.gl-kw-robot {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #0b6e3a;
+}
+
+.jsl-kw-learn,
+.gl-kw-learn {
+  font-size: 12px;
+  color: #475467;
+  line-height: 1.7;
+}
+
+.jsl-upload-chips,
+.gl-upload-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 0 2px;
+}
+
+.jsl-chip,
+.gl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 280px;
+  padding: 6px 8px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #d8ece2;
+  background: #f3fcf7;
+  color: #101828;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jsl-learn-banner,
+.gl-learn-banner {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #86efac;
+  background: linear-gradient(180deg, #ecfdf5, #fff);
+}
+
+.jsl-learn-banner strong,
+.gl-learn-banner strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #0b6e3a;
+  font-size: 14px;
+}
+
+.jsl-learn-banner p,
+.gl-learn-banner p {
+  margin: 0;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.7;
+}
+
+/* —— 报告入口卡片（同步数字碳表） —— */
+.jsl-report-ready,
+.gl-report-ready {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 20px;
+  padding: 6px 4px 4px;
+}
+
+.jsl-report-ready__main,
+.gl-report-ready__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.jsl-report-ready__title,
+.gl-report-ready__title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #101828;
+  line-height: 1.4;
+}
+
+.jsl-report-ready__desc,
+.gl-report-ready__desc {
+  margin: 0;
+  font-size: 13px;
+  color: #667085;
+  line-height: 1.55;
+}
+
+.jsl-report-ready__btn,
+.gl-report-ready__btn {
+  appearance: none;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 12px 22px;
+  border: 0;
+  border-radius: 10px;
+  background: #2f6bff;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.jsl-report-ready__btn:hover,
+.gl-report-ready__btn:hover {
+  background: #1f54e0;
+}
+
+.jsl-report-ready__btn:active,
+.gl-report-ready__btn:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 900px) {
+  .gl-kernel-caps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .gl-kernel-caps {
+    grid-template-columns: 1fr;
+  }
+
+  .gl-kernel-dialog__box {
+    flex-direction: column;
+  }
+
+  .gl-kernel-dialog__box input {
+    border-radius: 18px 18px 0 0;
+  }
+
+  .gl-kernel-dialog__go {
+    width: calc(100% - 20px);
+    margin: 0 10px 10px;
+  }
+
+  .jsl-report-ready,
+  .gl-report-ready {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .jsl-report-ready__btn,
+  .gl-report-ready__btn {
+    width: 100%;
+    text-align: center;
+  }
+}
