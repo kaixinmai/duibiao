@@ -966,9 +966,9 @@
         model.actionSuggestions = (model.actionSuggestions || []).concat(extraAdvice);
         model.enterpriseAdvice =
           (model.enterpriseAdvice || '') +
-          '（已根据上传材料完成演示性修订：强度校正 ' +
+          '（已根据上传材料完成修订：强度校正 ' +
           adj +
-          ' tCO₂/t。）';
+          ' tCO₂/t，详见对话区修改说明。）';
       }
 
       model.dataSourceText =
@@ -1092,132 +1092,335 @@
     });
   }
 
-  function handleFiles(fileList) {
+  /** 回形针暂存、尚未点发送的文件 */
+  var pendingFiles = [];
+
+  function escAttr(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function notifySendReady() {
+    var input = document.querySelector(
+      '.agent-copilot-input textarea, .agent-copilot-input input[type="text"], #cta-input'
+    );
+    if (input) {
+      try {
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      } catch (e) {
+        var ev = document.createEvent('Event');
+        ev.initEvent('input', true, true);
+        input.dispatchEvent(ev);
+      }
+    }
+  }
+
+  function resolveReportPeriod() {
+    try {
+      var raw = sessionStorage.getItem('jsl-duibiao-report-meta');
+      if (raw) {
+        var meta = JSON.parse(raw);
+        if (meta && meta.period) return String(meta.period);
+      }
+    } catch (e) {}
+    return String(new Date().getFullYear());
+  }
+
+  function hasPendingUploads() {
+    return pendingFiles.length > 0;
+  }
+
+  function stageFiles(fileList) {
+    if (!fileList || !fileList.length) return;
+    var added = 0;
+    Array.prototype.forEach.call(fileList, function (file) {
+      if (!file || !file.name) return;
+      var dup = pendingFiles.some(function (f) {
+        return f.name === file.name && f.size === file.size;
+      });
+      if (dup) return;
+      pendingFiles.push(file);
+      added += 1;
+    });
+    renderUploadChips();
+    notifySendReady();
+    if (added) {
+      toast('已添加 ' + added + ' 份材料，点击发送箭头完成上传');
+    }
+  }
+
+  function appendUserUploadBubble(files, extraText) {
+    var messages = document.getElementById('cta-messages');
+    var welcome = document.getElementById('cta-welcome');
+    if (!messages) return;
+    if (welcome) welcome.classList.add('hidden');
+    messages.classList.remove('hidden');
+    var names = files
+      .map(function (f) {
+        return f.name;
+      })
+      .join('、');
+    var body =
+      (extraText ? escAttr(extraText) + '<br/>' : '') +
+      '📎 上传材料：' +
+      escAttr(names);
+    var div = document.createElement('div');
+    div.className = 'cta-msg is-user';
+    div.innerHTML =
+      '<div class="cta-msg__bubble">' + body + '</div>';
+    messages.appendChild(div);
+    var scroll = document.getElementById('cta-scroll');
+    if (scroll) scroll.scrollTop = scroll.scrollHeight;
+  }
+
+  function createUploadThinking() {
+    var messages = document.getElementById('cta-messages');
+    if (!messages) return null;
+    var wrap = document.createElement('div');
+    wrap.className = 'cta-msg cta-msg--assistant cta-msg--process';
+    wrap.innerHTML =
+      '<div class="cta-msg__bubble cta-msg__bubble--wide">' +
+      '<div class="cta-thinking cta-thinking--query">' +
+      '<div class="cta-thinking__head">' +
+      '<span class="cta-thinking__spinner"></span>' +
+      '<span class="cta-thinking__title">正在处理上传材料</span>' +
+      '<span class="cta-thinking__elapsed"></span>' +
+      '</div>' +
+      '<div class="cta-thinking__body">' +
+      '<p class="cta-thinking__hint">先解析文件内容，再融合修改报告指标与结论</p>' +
+      '<ul class="cta-thinking__steps">' +
+      '<li class="cta-thinking__step is-active" data-phase="parse">' +
+      '<div class="cta-thinking__step-main">' +
+      '<span class="cta-thinking__dot"></span>' +
+      '<span class="cta-thinking__text">解析上传材料，提取可对标指标</span>' +
+      '<span class="cta-thinking__status">进行中…</span>' +
+      '</div></li>' +
+      '<li class="cta-thinking__step is-pending" data-phase="fuse">' +
+      '<div class="cta-thinking__step-main">' +
+      '<span class="cta-thinking__dot"></span>' +
+      '<span class="cta-thinking__text">融合材料内容，修改报告对应条目</span>' +
+      '<span class="cta-thinking__status"></span>' +
+      '</div></li>' +
+      '</ul></div></div></div>';
+    messages.appendChild(wrap);
+    var scroll = document.getElementById('cta-scroll');
+    if (scroll) scroll.scrollTop = scroll.scrollHeight;
+    return wrap;
+  }
+
+  function setThinkingPhase(wrap, phase, statusText) {
+    if (!wrap) return;
+    var root = wrap.querySelector('.cta-thinking');
+    var steps = wrap.querySelectorAll('.cta-thinking__step');
+    var title = wrap.querySelector('.cta-thinking__title');
+    var spinner = wrap.querySelector('.cta-thinking__spinner');
+    Array.prototype.forEach.call(steps, function (li) {
+      var p = li.getAttribute('data-phase');
+      var st = li.querySelector('.cta-thinking__status');
+      if (p === phase) {
+        li.classList.remove('is-pending', 'is-done');
+        li.classList.add('is-active');
+        if (st) st.textContent = statusText || '进行中…';
+      } else if (
+        (phase === 'fuse' && p === 'parse') ||
+        (phase === 'done' && (p === 'parse' || p === 'fuse'))
+      ) {
+        li.classList.remove('is-pending', 'is-active');
+        li.classList.add('is-done');
+        if (st) st.textContent = '完成';
+      }
+    });
+    if (phase === 'done') {
+      if (title) title.textContent = '上传材料处理完成';
+      if (spinner) spinner.style.display = 'none';
+      if (root) root.classList.add('is-collapsed');
+    } else if (phase === 'fuse' && title) {
+      title.textContent = '正在融合修改报告';
+    }
+  }
+
+  function delay(ms) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  /**
+   * 发送箭头触发：解析 → 融合 → 输出修改说明 → 更新报告卡片
+   */
+  function tryConsumePendingUploads(userText) {
     var data = pack();
-    if (!data || !fileList || !fileList.length) return;
+    var files = pendingFiles.slice();
+    pendingFiles = [];
+    renderUploadChips();
+    notifySendReady();
 
-    var files = Array.prototype.slice.call(fileList);
-    toast('正在解析 ' + files.length + ' 份材料…');
+    if (!data || !files.length) {
+      return Promise.resolve(false);
+    }
 
-    Promise.all(
-      files.map(function (file) {
-        return readFileText(file).then(function (text) {
-          return { file: file, text: text };
+    appendUserUploadBubble(files, userText);
+    var thinking = createUploadThinking();
+
+    return delay(700)
+      .then(function () {
+        return Promise.all(
+          files.map(function (file) {
+            return readFileText(file).then(function (text) {
+              return { file: file, text: text };
+            });
+          })
+        );
+      })
+      .then(function (parsedFiles) {
+        setThinkingPhase(thinking, 'parse', '完成');
+        var period = resolveReportPeriod();
+        var items = [];
+        var parseNotes = [];
+
+        parsedFiles.forEach(function (pf) {
+          var cat = data.classifyUpload(pf.file.name);
+          var item = data.addUpload({
+            name: pf.file.name,
+            size: pf.file.size,
+            type: pf.file.type,
+            category: cat,
+            extractedText: pf.text,
+          });
+          items.push(item);
+          (item.changelog || []).forEach(function (c) {
+            parseNotes.push(c);
+          });
+        });
+
+        renderUploadChips();
+        setThinkingPhase(thinking, 'fuse', '进行中…');
+        return delay(900).then(function () {
+          return { items: items, parseNotes: parseNotes, period: period };
         });
       })
-    ).then(function (parsedFiles) {
-      var items = [];
-      var allChangelog = [];
-      var period =
-        (global.DemoSceneKernel &&
+      .then(function (ctx) {
+        var allChanges = [];
+        ctx.items.forEach(function (item) {
+          var applied = data.applyUploadOptimizations(item, ctx.period);
+          allChanges = allChanges.concat(applied.changes || applied.changelog || []);
+        });
+
+        setThinkingPhase(thinking, 'done');
+
+        var hasReport =
+          global.DemoSceneKernel &&
           global.DemoSceneKernel.hasActiveReport &&
-          global.DemoSceneKernel.hasActiveReport() &&
-          sessionStorage.getItem('jsl-duibiao-report-meta') &&
-          (function () {
-            try {
-              return JSON.parse(sessionStorage.getItem('jsl-duibiao-report-meta')).period;
-            } catch (e) {
-              return null;
-            }
-          })()) ||
-        String(new Date().getFullYear());
+          global.DemoSceneKernel.hasActiveReport();
 
-      parsedFiles.forEach(function (pf) {
-        var cat = data.classifyUpload(pf.file.name);
-        var item = data.addUpload({
-          name: pf.file.name,
-          size: pf.file.size,
-          type: pf.file.type,
-          category: cat,
-          extractedText: pf.text,
-        });
-        var applied = data.applyUploadOptimizations(item, period);
-        items.push(item);
-        allChangelog = allChangelog.concat(applied.changelog || item.changelog || []);
-      });
+        var explain =
+          '<p><strong>文件解析与融合已完成</strong>，共处理 ' +
+          ctx.items.length +
+          ' 份材料。</p>';
 
-      renderUploadChips();
+        if (ctx.parseNotes.length) {
+          explain +=
+            '<p><strong>① 解析结果：</strong></p><ol>' +
+            ctx.parseNotes
+              .slice(0, 10)
+              .map(function (c) {
+                return '<li>' + escAttr(c) + '</li>';
+              })
+              .join('') +
+            '</ol>';
+        }
 
-      var hasReport =
-        global.DemoSceneKernel &&
-        global.DemoSceneKernel.hasActiveReport &&
-        global.DemoSceneKernel.hasActiveReport();
-
-      var explain =
-        '<p><strong>已依据上传材料完成解析与报告优化准备</strong></p><ul>' +
-        items
-          .map(function (it) {
-            return (
-              '<li><strong>' +
-              it.name +
-              '</strong>：' +
-              (it.summary || '') +
-              '</li>'
-            );
-          })
-          .join('') +
-        '</ul>';
-
-      if (allChangelog.length) {
         explain +=
-          '<p><strong>依据文件优化 / 修改的内容：</strong></p><ol>' +
-          allChangelog
-            .slice(0, 12)
-            .map(function (c) {
-              return '<li>' + c + '</li>';
-            })
-            .join('') +
+          '<p><strong>② 本次报告修改说明：</strong></p><ol>' +
+          (allChanges.length
+            ? allChanges
+                .slice(0, 12)
+                .map(function (c) {
+                  return '<li>' + escAttr(c) + '</li>';
+                })
+                .join('')
+            : '<li>未识别到可写入报告的指标，仅更新了学习笔记</li>') +
           '</ol>';
-      }
 
-      if (hasReport && global.DemoSceneKernel.regenerateOptimizedReport) {
-        global.DemoSceneKernel.regenerateOptimizedReport({
-          userText: '根据上传材料优化报告',
-          changelog: allChangelog,
-          updated: true,
-        });
-        explain +=
-          '<p>已重新生成<strong>优化版智能对标分析报告</strong>，请点击下方「查看对标分析报告」核对修订结果。</p>';
-        toast('已按上传材料优化并更新报告');
-      } else {
-        explain +=
-          '<p>当前尚未生成报告。请先进行对标分析生成报告；或输入「根据上传材料更新报告」生成修订版。</p>';
-        toast('已学习 ' + items.length + ' 份材料');
-      }
+        if (hasReport && global.DemoSceneKernel.regenerateOptimizedReport) {
+          explain +=
+            '<p>下方已刷新<strong>智能对标分析报告</strong>，请打开核对修订结果。</p>';
+          appendAssistantNote(explain);
+          global.DemoSceneKernel.regenerateOptimizedReport({
+            userText: userText || '根据上传材料优化报告',
+            changelog: allChanges,
+            updated: true,
+          });
+          toast('已按上传材料更新报告');
+        } else {
+          explain +=
+            '<p>当前尚未生成报告。材料已学习入库；请先做对标分析生成报告，或稍后输入「根据上传材料更新报告」。</p>';
+          appendAssistantNote(explain);
+          toast('已学习 ' + ctx.items.length + ' 份材料');
+        }
 
-      appendAssistantNote(explain);
-    });
+        return true;
+      });
   }
 
   function renderUploadChips() {
     var bar = document.getElementById('jsl-upload-chips');
     var data = pack();
-    if (!bar || !data) return;
-    if (!data.uploads.length) {
+    if (!bar) return;
+
+    var html = '';
+    pendingFiles.forEach(function (f, idx) {
+      html +=
+        '<span class="jsl-chip jsl-chip--pending" title="待发送">' +
+        '📎 ' +
+        escAttr(f.name) +
+        '<em class="jsl-chip__tag">待发送</em>' +
+        '<button type="button" data-pending-rm="' +
+        idx +
+        '" aria-label="移除">×</button></span>';
+    });
+
+    if (data && data.uploads && data.uploads.length) {
+      data.uploads.forEach(function (u) {
+        html +=
+          '<span class="jsl-chip" title="' +
+          escAttr(u.summary || '') +
+          '">📎 ' +
+          escAttr(u.name) +
+          '<em class="jsl-chip__tag jsl-chip__tag--done">已学习</em>' +
+          '<button type="button" data-rm="' +
+          escAttr(u.id) +
+          '" aria-label="移除">×</button></span>';
+      });
+    }
+
+    if (!html) {
       bar.hidden = true;
       bar.innerHTML = '';
       return;
     }
     bar.hidden = false;
-    bar.innerHTML = data.uploads
-      .map(function (u) {
-        return (
-          '<span class="jsl-chip" title="' +
-          u.summary +
-          '">📎 ' +
-          u.name +
-          '<button type="button" data-rm="' +
-          u.id +
-          '" aria-label="移除">×</button></span>'
-        );
-      })
-      .join('');
-    bar.querySelectorAll('button[data-rm]').forEach(function (btn) {
+    bar.innerHTML = html;
+
+    bar.querySelectorAll('button[data-pending-rm]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        data.removeUpload(btn.getAttribute('data-rm'));
+        var i = parseInt(btn.getAttribute('data-pending-rm'), 10);
+        if (!isNaN(i)) pendingFiles.splice(i, 1);
         renderUploadChips();
+        notifySendReady();
       });
     });
+    if (data) {
+      bar.querySelectorAll('button[data-rm]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          data.removeUpload(btn.getAttribute('data-rm'));
+          renderUploadChips();
+        });
+      });
+    }
   }
 
   function wireUpload() {
@@ -1249,18 +1452,29 @@
       });
     }
 
+    // 回形针：仅暂存，等发送箭头再解析融合
     fileInput.addEventListener('change', function () {
-      handleFiles(fileInput.files);
+      stageFiles(fileInput.files);
       fileInput.value = '';
     });
+  }
+
+  function exportUploadApi() {
+    if (!global.DemoSceneKernel) global.DemoSceneKernel = {};
+    global.DemoSceneKernel.hasPendingUploads = hasPendingUploads;
+    global.DemoSceneKernel.tryConsumePendingUploads = tryConsumePendingUploads;
   }
 
   function boot() {
     if (!pack()) return;
     patchDataService();
     patchReport();
+    exportUploadApi();
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', wireUpload);
+      document.addEventListener('DOMContentLoaded', function () {
+        wireUpload();
+        exportUploadApi();
+      });
     } else {
       wireUpload();
     }

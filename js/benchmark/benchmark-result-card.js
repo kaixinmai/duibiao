@@ -93,8 +93,23 @@ var BenchmarkResultCard = {
       ? '<div class="benchmark-rank-list__head">' + (typeof BenchmarkDataService !== 'undefined' ? BenchmarkDataService.DISPLAY.SELF : '河南钢铁集团') + ' 排名 <strong>第 ' + ranking.rank + ' / ' + ranking.total + ' 名</strong> · 超越 <strong>' + ranking.percentile + '%</strong> 同行</div>'
       : '';
 
+    var industryLabel = (ranking && ranking.industry) || '钢铁';
+    if (
+      (!ranking || !ranking.industry) &&
+      typeof BenchmarkDataService !== 'undefined' &&
+      BenchmarkDataService.DISPLAY &&
+      /水泥/.test(String(BenchmarkDataService.DISPLAY.INDUSTRY_AVG || ''))
+    ) {
+      industryLabel = '水泥';
+    }
+    var poolTotal = ranking && ranking.total ? ranking.total : industryLabel === '水泥' ? 310 : 232;
+    var rankTitle =
+      industryLabel === '水泥'
+        ? '全国碳市场水泥企业碳强度排名（' + poolTotal + '家）'
+        : '全国碳市场钢铁企业碳强度排名（' + poolTotal + '家）';
+
     return '<div class="benchmark-rank-list">' +
-      '<div class="benchmark-rank-list__title">全国碳市场钢铁企业碳强度排名（232家）</div>' +
+      '<div class="benchmark-rank-list__title">' + rankTitle + '</div>' +
       head +
       '<ul class="benchmark-rank-list__items">' + items + '</ul>' +
     '</div>';

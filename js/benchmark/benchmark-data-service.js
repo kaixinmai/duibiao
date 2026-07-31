@@ -177,7 +177,7 @@ var BenchmarkDataService = {
   _industryProcessContext: function (industry) {
     if (industry === '水泥') {
       return {
-        processFocus: '熟料烧成、窑系统与粉磨工序',
+        processFocus: '熟料烧成、窑系统与水泥粉磨生产线',
         reductionItems: [
           {
             direction: '提升替代燃料与绿电占比',
@@ -198,7 +198,7 @@ var BenchmarkDataService = {
         waterfall: ['熟料烧成差距', '窑系统能效差距', '替代燃料/能源结构', '其他环节'],
         compareActions: [
           '将当前优于对标样本的窑系统低碳运行参数写入 SOP，建立班组级熟料强度与燃料单耗联动 KPI。',
-          '参照行业标杆替代燃料与绿电水平，制定 3 年 RDF 掺加与绿电采购路线图，优先覆盖窑系统与粉磨工序。',
+          '参照行业标杆替代燃料与绿电水平，制定 3 年 RDF 掺加与绿电采购路线图，优先覆盖窑系统与粉磨生产线。',
           '推进窑尾余热发电扩容与低碱度熟料配方优化，预计可再挖掘约 ' // will be filled
         ]
       };

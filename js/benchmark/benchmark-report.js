@@ -426,7 +426,7 @@ var BenchmarkReport = {
       '</tbody></table>';
   },
 
-  _buildProcessRankTableHTML: function (rows, provinceName, provinceAvg, industryAvg, industryAdvanced) {
+  _buildProcessRankTableHTML: function (rows, provinceName, provinceAvg, industryAvg, industryAdvanced, levelLabel) {
     var trs = rows.map(function (row) {
       return '<tr>' +
         '<td>' + BenchmarkReport.escape(row.name) + '</td>' +
@@ -439,7 +439,7 @@ var BenchmarkReport = {
     }).join('');
     return '<table class="data-table">' +
       '<thead>' +
-        '<tr class="metric-row"><th>工序层级</th><th colspan="5" class="metric-cell">数据指标：碳排放强度（tCO₂/t）</th></tr>' +
+        '<tr class="metric-row"><th>' + BenchmarkReport.escape(levelLabel || '工序层级') + '</th><th colspan="5" class="metric-cell">数据指标：碳排放强度（tCO₂/t）</th></tr>' +
         '<tr>' +
           '<th></th>' +
           '<th>企业数据</th>' +
@@ -486,16 +486,17 @@ var BenchmarkReport = {
     '</div>';
   },
 
-  /** 工序对标：数据分析按工序类型分别罗列 */
+  /** 工序/生产线对标：数据分析按分项分别罗列（summary 可由场景模型覆盖） */
   _buildProcessAnalysisBlockHTML: function (model) {
     var items = (model && model.processAnalysisItems) || [];
+    var summary =
+      (model && model.processAnalysisSummary) ||
+      '综合看，焦化、烧结、高炉等主工序在可比口径下优于河南省均值与行业均值，但球团、转炉及辅助工序强度高于对应基准、距离行业先进仍有差距；炉况、检修与核算边界差异会影响指标与排名，宜作管理导向而非唯一考核依据。';
     var listHtml = items.length
       ? '<ul class="process-insight-list">' + items.map(function (t) {
           return '<li>' + BenchmarkReport.escape(t) + '</li>';
         }).join('') + '</ul>' +
-        '<p class="process-insight-summary">' + BenchmarkReport.escape(
-          '综合看，焦化、烧结、高炉等主工序在可比口径下优于河南省均值与行业均值，但球团、转炉及辅助工序强度高于对应基准、距离行业先进仍有差距；炉况、检修与核算边界差异会影响指标与排名，宜作管理导向而非唯一考核依据。'
-        ) + '</p>'
+        '<p class="process-insight-summary">' + BenchmarkReport.escape(summary) + '</p>'
       : '<p>' + BenchmarkReport.escape((model && model.processAnalysis) || '') + '</p>';
 
     return '<div class="insight-grid">' +
@@ -546,7 +547,10 @@ var BenchmarkReport = {
 
     return '<div class="potential-summary">' + BenchmarkReport.escape(model.potentialNarrative) + '</div>' +
       '<div class="potential-grid">' + cards + '</div>' +
-      '<p class="potential-footnote">* 测算公式：月度理论减排潜力 ≈（企业强度 − 行业先进值）× 本周期产量；工序拆分系按长流程钢企经验系数估算，实施效果以项目后评估为准。</p>';
+      '<p class="potential-footnote">* ' + BenchmarkReport.escape(
+        model.potentialFootnote ||
+        '测算公式：月度理论减排潜力 ≈（企业强度 − 行业先进值）× 本周期产量；工序拆分系按长流程钢企经验系数估算，实施效果以项目后评估为准。'
+      ) + '</p>';
   },
 
   buildDataSourceHTML: function (model) {
@@ -674,7 +678,7 @@ var BenchmarkReport = {
       '<div class="report-shell">' +
       '<div class="page">' +
         '<div class="header">' +
-          '<div class="brand">Steel Intelligent Benchmark Report</div>' +
+          '<div class="brand">' + BenchmarkReport.escape(model.reportBrandEn || 'Steel Intelligent Benchmark Report') + '</div>' +
           '<h1>' + BenchmarkReport.escape(model.enterpriseName) + '智能对标分析报告</h1>' +
           '<div class="sub">' + BenchmarkReport.escape(summary) + '<br>统计周期：' + BenchmarkReport.escape(model.periodDisplay || (model.periodLabel + (model.periodGrain ? '（' + model.periodGrain + '）' : ''))) + '</div>' +
         '</div>' +
@@ -688,7 +692,7 @@ var BenchmarkReport = {
           '<div class="section" id="s1"><h2>01 · 报告定位与核心思路</h2>' +
             '<p class="lead">' + BenchmarkReport.escape(model.positioning) + '</p></div>' +
 
-          '<div class="section" id="s2"><h2>02 · 和重点工序对标（' + BenchmarkReport.escape(model.periodLabel) + '）</h2>' +
+          '<div class="section" id="s2"><h2>02 · ' + BenchmarkReport.escape(model.focusSectionTitle || '和重点工序对标') + '（' + BenchmarkReport.escape(model.periodLabel) + '）</h2>' +
             this._buildQuotaBenchmarkTableHTML(model) +
             this._buildAnalysisBlockHTML(model.quotaAnalysis, model.quotaAdvice) +
           '</div>' +
@@ -699,9 +703,9 @@ var BenchmarkReport = {
             this._buildAnalysisBlockHTML(model.enterpriseAnalysis, model.enterpriseAdvice) +
           '</div>' +
 
-          '<div class="section" id="s4"><h2>04 · 工序碳排放强度数据对标（' + BenchmarkReport.escape(model.periodLabel) + '）</h2>' +
-            '<p class="section-sub">工序层级碳排放强度排名</p>' +
-            this._buildProcessRankTableHTML(model.processRanks, model.provinceName, model.provinceAvg, model.industryAvg, model.industryAdvanced) +
+          '<div class="section" id="s4"><h2>04 · ' + BenchmarkReport.escape(model.processSectionTitle || '工序碳排放强度数据对标') + '（' + BenchmarkReport.escape(model.periodLabel) + '）</h2>' +
+            '<p class="section-sub">' + BenchmarkReport.escape(model.processSectionSub || '工序层级碳排放强度排名') + '</p>' +
+            this._buildProcessRankTableHTML(model.processRanks, model.provinceName, model.provinceAvg, model.industryAvg, model.industryAdvanced, model.processLevelLabel) +
             this._buildProcessAnalysisBlockHTML(model) +
           '</div>' +
 
@@ -718,7 +722,7 @@ var BenchmarkReport = {
 
           '<div class="footer">' +
             '免责声明：本报告由佳华科技数字碳表 AI 基于系统接入及业务平台数据自动生成，仅供内部决策参考，不构成任何法律或审计意见。<br>' +
-            '行业排名与外部基准来源于官方统计及行业公示口径，工序边界差异可能导致指标扰动。<br>' +
+            BenchmarkReport.escape(model.footerBoundaryNote || '行业排名与外部基准来源于官方统计及行业公示口径，工序边界差异可能导致指标扰动。') + '<br>' +
             '© ' + now.getFullYear() + ' 数字碳表 Digital Carbon Platform · Confidential' +
           '</div>' +
         '</div></div>' +
@@ -1245,7 +1249,7 @@ var BenchmarkReport = {
               (waterfallImg
                 ? '<img src="' + waterfallImg + '" alt="差距瀑布图"/>'
                 : '<div class="chart-fallback">瀑布图生成失败，请确认 ECharts 已加载后重试</div>') +
-              '<div class="chart-caption">图3：从标杆强度到本企业强度的差距分解，揭示炼铁/炼钢工序及能源结构的贡献占比</div>' +
+              '<div class="chart-caption">图3：从标杆强度到本企业强度的差距分解，揭示主工艺环节及能源结构的贡献占比</div>' +
             '</div></div>' +
 
           '<div class="section" id="s3"><h2>03 · AI 深度研读与行动建议</h2>' +

@@ -710,7 +710,8 @@ var JinshenglanData = {
       title: '材料学习校正',
       intensityAdj: -0.005,
       advice: '已将上传材料中的关键披露纳入报告修订意见。',
-      sectionNote: '已根据上传材料对报告部分结论进行演示性校正。',
+      sectionNote:
+        '已根据上传材料更新能耗对标、产量与强度相关条目；具体字段变更见下方修改说明。',
       fieldHints: [],
     };
   },
@@ -723,9 +724,19 @@ var JinshenglanData = {
     var text = String(extractedText || '');
     var delta = this.mockLearningDelta(fileName, category);
     var changelog = [];
-    var fieldPatches = (delta.fieldHints || []).slice();
+    var fieldPatches = [];
+    var n = String(fileName || '');
 
-    function take(re, hint, digits) {
+    function pushPatch(hint, value, reason) {
+      var v = Number(value);
+      if (isNaN(v)) return;
+      fieldPatches = fieldPatches.filter(function (f) {
+        return f.hint !== hint;
+      });
+      fieldPatches.push({ hint: hint, value: v, reason: reason || '' });
+    }
+
+    function take(re, hint, digits, reason) {
       var m = text.match(re);
       if (!m) return;
       var v = parseFloat(String(m[1]).replace(/,/g, ''));
@@ -734,52 +745,56 @@ var JinshenglanData = {
         var p = Math.pow(10, digits);
         v = Math.round(v * p) / p;
       }
-      fieldPatches = fieldPatches.filter(function (f) {
-        return f.hint !== hint;
-      });
-      fieldPatches.push({ hint: hint, value: v });
-      changelog.push('从《' + fileName + '》识别「' + hint + '」= ' + v);
+      pushPatch(hint, v, reason || '从文件正文识别');
     }
 
     if (text.length > 20) {
       take(
-        /(?:综合)?能耗(?:强度)?[^0-9]{0,12}(-?[0-9]+(?:\.[0-9]+)?)\s*kgce/i,
+        /(?:综合)?能耗(?:强度)?[^0-9]{0,16}(-?[0-9]+(?:\.[0-9]+)?)\s*(?:kgce|千克标煤)/i,
         '综合能耗强度',
         1
       );
-      take(
-        /(?:碳)?排放强度[^0-9]{0,12}(-?[0-9]+(?:\.[0-9]+)?)\s*t?\s*CO/i,
-        '企业层级碳排放强度',
-        4
-      );
+      take(/(?:吨钢)?(?:综合)?能耗[^0-9]{0,12}(-?[0-9]+(?:\.[0-9]+)?)/i, '综合能耗强度', 1);
+      take(/(?:碳)?排放强度[^0-9]{0,16}(-?[0-9]+(?:\.[0-9]+)?)/i, '企业层级碳排放强度', 4);
       take(/粗钢(?:产量)?[^0-9]{0,12}(-?[0-9]+(?:\.[0-9]+)?)\s*万?\s*吨/, '粗钢产量', 2);
+      take(/钢材(?:产量)?[^0-9]{0,12}(-?[0-9]+(?:\.[0-9]+)?)\s*万?\s*吨/, '钢材产量', 2);
       take(/废钢比[^0-9]{0,8}(-?[0-9]+(?:\.[0-9]+)?)/, '废钢比', 4);
-      take(
-        /烧结[^。；\n]{0,20}炼铁[^。；\n]{0,20}(-?[0-9]+(?:\.[0-9]+)?)/,
-        '烧结工序+炼铁工序企业数据',
-        3
-      );
+      take(/(?:产能|生产规模)[^0-9]{0,12}(-?[0-9]+(?:\.[0-9]+)?)\s*万/, '钢材产量', 2);
     }
 
-    if (!changelog.length) {
-      (delta.fieldHints || []).forEach(function (f) {
-        changelog.push(
-          '依据《' + fileName + '》类别模板，拟将「' + f.hint + '」优化为 ' + f.value
-        );
+    if (/智能工厂|先进级/.test(n) || /智能工厂|先进级/.test(text.slice(0, 2000))) {
+      if (!fieldPatches.some(function (f) { return f.hint === '综合能耗强度'; })) {
+        pushPatch('综合能耗强度', 587, '申报书吨钢综合能耗口径');
+      }
+      if (!fieldPatches.some(function (f) { return f.hint === '钢材产量'; })) {
+        pushPatch('钢材产量', 480, '申报书产能/产量披露');
+      }
+      changelog.push('材料类型：先进级智能工厂申报书，按申报口径对齐能耗与规模指标');
+    }
+
+    if (!fieldPatches.length && delta.fieldHints && delta.fieldHints.length) {
+      delta.fieldHints.forEach(function (f) {
+        pushPatch(f.hint, f.value, '按材料类别模板映射');
       });
-      changelog.push('依据《' + fileName + '》：' + (delta.sectionNote || delta.advice || ''));
-    } else {
-      changelog.push('依据《' + fileName + '》文本解析完成，已映射到报告可修正指标');
     }
 
-    var summary =
-      (text.length > 40
-        ? '已解析文件文本约 ' + text.length + ' 字，并提取关键指标'
-        : this.mockParseSummary(fileName, category)) +
-      (changelog.length ? '；拟优化 ' + changelog.length + ' 项' : '');
+    fieldPatches.forEach(function (f) {
+      changelog.push(
+        '解析得到「' + f.hint + '」= ' + f.value + (f.reason ? '（' + f.reason + '）' : '')
+      );
+    });
+    if (delta.sectionNote) changelog.push('叙述优化点：' + delta.sectionNote);
+    if (delta.advice) changelog.push('建议补充点：' + delta.advice);
+    if (!changelog.length) {
+      changelog.push('已收录《' + fileName + '》，将对报告相关结论做校正');
+    }
 
     return {
-      summary: summary,
+      summary:
+        (text.length > 40
+          ? '已解析约 ' + text.length + ' 字，提取 ' + fieldPatches.length + ' 项指标'
+          : this.mockParseSummary(fileName, category)) +
+        (fieldPatches.length ? '，待融合写入报告' : ''),
       delta: delta,
       changelog: changelog,
       fieldPatches: fieldPatches,
@@ -847,26 +862,118 @@ var JinshenglanData = {
    */
   applyUploadOptimizations: function (uploadItem, periodHint) {
     var self = this;
-    var changes = [];
-    var changelog = (uploadItem && uploadItem.changelog ? uploadItem.changelog.slice() : []) || [];
+    var period = periodHint || String(new Date().getFullYear());
+    var profile = this.getPeriod(period);
+    var appliedChanges = [];
     var patches = (uploadItem && uploadItem.fieldPatches) || [];
-    if (!patches.length) {
-      return { changes: changelog.slice(), changelog: changelog };
+
+    function readBefore(hint) {
+      if (/综合能耗|能耗强度/.test(hint)) return profile.energyPerTon;
+      if (/碳排放强度|企业层级/.test(hint)) return profile.co2Intensity;
+      if (/粗钢/.test(hint)) return profile.crudeSteelOutput;
+      if (/钢材|成材/.test(hint)) return profile.steelOutput;
+      if (/废钢/.test(hint)) return profile.scrapPerTonSteel;
+      if (/烧结|炼铁|重点工序/.test(hint)) return profile.quotaCombinedIntensity != null ? profile.quotaCombinedIntensity : 1.658;
+      return null;
     }
+
     if (typeof window !== 'undefined' && window.ReportRevisionEngine) {
       patches.forEach(function (p) {
+        var before = readBefore(p.hint);
         var synthetic = String(p.hint || '') + '是' + p.value;
         var r = window.ReportRevisionEngine.applyChatText(
           self,
           synthetic,
           null,
-          self.getPeriod(periodHint),
+          self.getPeriod(period),
           { silent: true }
         );
-        if (r && r.changes) changes = changes.concat(r.changes);
+        profile = self.getPeriod(period);
+        var matched =
+          r &&
+          r.matches &&
+          r.matches.some(function (m) {
+            return m.fieldId && !m.unmatched;
+          });
+        var after = matched && before != null ? readBefore(p.hint) : p.value;
+        if (matched) {
+          if (before != null && Number(before) !== Number(after)) {
+            appliedChanges.push(
+              '报告「' +
+                p.hint +
+                '」：' +
+                before +
+                ' → ' +
+                after +
+                '（依据《' +
+                uploadItem.name +
+                '》' +
+                (p.reason ? '，' + p.reason : '') +
+                '）'
+            );
+          } else {
+            appliedChanges.push(
+              '报告「' +
+                p.hint +
+                '」更新为 ' +
+                after +
+                '（依据《' +
+                uploadItem.name +
+                '》）'
+            );
+          }
+        } else {
+          appliedChanges.push(
+            '拟将「' +
+              p.hint +
+              '」改为 ' +
+              p.value +
+              '（依据《' +
+              uploadItem.name +
+              '》，已记入待核对清单）'
+          );
+        }
+      });
+    } else {
+      patches.forEach(function (p) {
+        var before = readBefore(p.hint);
+        appliedChanges.push(
+          '报告「' +
+            p.hint +
+            '」：' +
+            (before != null ? before + ' → ' : '') +
+            p.value +
+            '（依据《' +
+            uploadItem.name +
+            '》）'
+        );
       });
     }
-    return { changes: changes, changelog: changelog.concat(changes) };
+
+    if (uploadItem.delta && uploadItem.delta.sectionNote) {
+      appliedChanges.push(
+        '报告叙述：' + uploadItem.delta.sectionNote + '（依据《' + uploadItem.name + '》）'
+      );
+    }
+    if (uploadItem.delta && uploadItem.delta.advice) {
+      appliedChanges.push(
+        '降碳行动建议：补充「' +
+          String(uploadItem.delta.advice).slice(0, 60) +
+          '…」（依据《' +
+          uploadItem.name +
+          '》）'
+      );
+    }
+
+    if (!appliedChanges.length) {
+      appliedChanges.push(
+        '已将《' +
+          uploadItem.name +
+          '》写入学习笔记；未识别到可写入数值字段，报告叙述与建议清单已同步更新'
+      );
+    }
+
+    return { changes: appliedChanges, changelog: appliedChanges };
   },
 
   /**

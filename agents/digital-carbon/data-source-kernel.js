@@ -857,7 +857,9 @@
 
     appendReportReadyCard(chartId, period, timeDimension === 'monthly' ? '月度' : '年度', {
       updated: opts.updated !== false,
-      extraDesc: changelog.length ? changelog[0] : '已按材料完成优化',
+      extraDesc: changelog.length
+        ? '已按材料修订 ' + changelog.length + ' 项'
+        : '已按材料完成优化',
     });
     return { chartId: chartId, payload: payload, changelog: changelog };
   }

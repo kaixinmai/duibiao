@@ -40,6 +40,28 @@
   color: #d92d20;
 }
 
+.jsl-chip--pending {
+  border-color: #f5d0a9;
+  background: #fff8f0;
+}
+
+.jsl-chip__tag {
+  flex-shrink: 0;
+  margin-left: 2px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #ffe8cc;
+  color: #b54708;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.jsl-chip__tag--done {
+  background: #d1fadf;
+  color: #027a48;
+}
+
 .jsl-learn-banner {
   margin: 0 0 18px;
   padding: 14px 16px;

@@ -976,6 +976,13 @@
       return;
     }
     var ready = !!getInputText();
+    if (
+      window.DemoSceneKernel &&
+      typeof window.DemoSceneKernel.hasPendingUploads === 'function' &&
+      window.DemoSceneKernel.hasPendingUploads()
+    ) {
+      ready = true;
+    }
     sendBtn.disabled = !ready;
     sendBtn.classList.toggle('agent-copilot-input__send--ready', ready);
     sendBtn.classList.toggle('agent-copilot-input__send--disabled', !ready);
@@ -1274,11 +1281,12 @@
         typeof window.DemoSceneKernel.shouldSkipRetrieval === 'function' &&
         window.DemoSceneKernel.shouldSkipRetrieval(lastUserText)) ||
       (Array.isArray(lastQuerySteps) && lastQuerySteps.length === 0);
-    // 兜底：页面上已有报告卡片时，即使内核未就绪也跳过检索
+    // 兜底：页面上已有报告卡片时，即使内核未就绪也跳过检索（数字碳表 / 集团碳账本）
     if (
       !skipRetrieval &&
       window.DemoSceneKernel &&
-      window.DemoSceneKernel.id === 'digital-carbon-jinshenglan'
+      (window.DemoSceneKernel.id === 'digital-carbon-jinshenglan' ||
+        window.DemoSceneKernel.id === 'group-ledger-jidong')
     ) {
       try {
         if (
@@ -1473,6 +1481,28 @@
     syncSendBtn();
     if (!sendBtn || sendBtn.disabled || state.loading) return;
 
+    // 有待发送附件：先走上传解析→融合→报告更新流程
+    if (
+      window.DemoSceneKernel &&
+      typeof window.DemoSceneKernel.tryConsumePendingUploads === 'function' &&
+      window.DemoSceneKernel.hasPendingUploads &&
+      window.DemoSceneKernel.hasPendingUploads()
+    ) {
+      var uploadText = getInputText();
+      if (inputEl) inputEl.value = '';
+      syncSendBtn();
+      state.loading = true;
+      syncSendBtn();
+      Promise.resolve(window.DemoSceneKernel.tryConsumePendingUploads(uploadText))
+        .catch(function () {})
+        .then(function () {
+          state.loading = false;
+          syncSendBtn();
+          saveSession();
+        });
+      return;
+    }
+
     var text = getInputText();
     if (!text) return;
 
@@ -1505,13 +1535,39 @@
     runQueryPhase().then(function () {
       return runAnalysisPhase();
     }).then(function () {
-      var result = BenchmarkSlotFilling.handleMessage(text);
+      // beforeHandle 必须在构建结果前生效：handleMessage 内部会 reset，
+      // 若先 build 再 beforeHandle，场景内核的年度对标槽位来不及写入结果。
+      BenchmarkSlotFilling.reset();
+      BenchmarkSlotFilling.parseMessage(text);
       if (
         window.DemoSceneKernel &&
         typeof window.DemoSceneKernel.beforeHandle === 'function'
       ) {
         window.DemoSceneKernel.beforeHandle(text);
       }
+
+      var resolved = BenchmarkSlotFilling.resolveEnterpriseIntensity();
+      if (!resolved) {
+        var fallbackIndustry = BenchmarkSlotFilling.slots.industry || '钢铁';
+        var fallbackIntensity =
+          typeof BenchmarkDataService !== 'undefined' &&
+          typeof BenchmarkDataService.getDemoIntensity === 'function'
+            ? BenchmarkDataService.getDemoIntensity(fallbackIndustry, BenchmarkSlotFilling.slots)
+            : 1.89;
+        BenchmarkSlotFilling.slots.enterpriseIntensity = fallbackIntensity;
+        BenchmarkSlotFilling.slots.dataSource = 'demo';
+        resolved = { intensity: fallbackIntensity, source: 'demo' };
+      }
+
+      var result =
+        typeof BenchmarkDataService !== 'undefined'
+          ? BenchmarkDataService.buildResultByFocus(
+              BenchmarkSlotFilling.getSlots(),
+              resolved.source,
+              text
+            )
+          : BenchmarkSlotFilling.handleMessage(text);
+
       if (typeof BenchmarkAgent !== 'undefined') {
         BenchmarkAgent.updateSlotTags();
       }
@@ -1526,11 +1582,27 @@
 
       if (typeof BenchmarkAgent !== 'undefined') {
         var deliverChat = true;
+        var kernel = window.DemoSceneKernel;
+        if (kernel && typeof kernel.shouldDeliverChatResult === 'function') {
+          deliverChat = !!kernel.shouldDeliverChatResult(text, result);
+        }
+        // 报告优先场景兜底：即使 shouldDeliverChatResult 未挂上，年度对标也不得出长文气泡
         if (
-          window.DemoSceneKernel &&
-          typeof window.DemoSceneKernel.shouldDeliverChatResult === 'function'
+          deliverChat &&
+          kernel &&
+          (kernel.id === 'digital-carbon-jinshenglan' ||
+            kernel.id === 'group-ledger-jidong')
         ) {
-          deliverChat = !!window.DemoSceneKernel.shouldDeliverChatResult(text, result);
+          if (
+            (typeof kernel.detectYearlyBenchmarkIntent === 'function' &&
+              kernel.detectYearlyBenchmarkIntent(text)) ||
+            (typeof kernel.detectGroupAggregateIntent === 'function' &&
+              kernel.detectGroupAggregateIntent(text)) ||
+            (typeof kernel.shouldSkipRetrieval === 'function' &&
+              kernel.shouldSkipRetrieval(text))
+          ) {
+            deliverChat = false;
+          }
         }
         if (deliverChat) {
           BenchmarkAgent.deliverResult(result);
