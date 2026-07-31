@@ -627,6 +627,17 @@
   function previewRevisionChanges(text) {
     var t = String(text || '').replace(/,/g, '');
     var changes = [];
+    if (
+      (/烧结/.test(t) && /炼铁/.test(t)) ||
+      /重点工序/.test(t) ||
+      /烧结工序\s*\+|工序\s*\+\s*炼铁/.test(t)
+    ) {
+      var q =
+        t.match(
+          /企业数据[^0-9\-]{0,8}(?:是|为|改成|改为|调整为|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+        ) || t.match(/(-?[0-9]+(?:\.[0-9]+)?)/);
+      if (q) changes.push('烧结+炼铁工序企业数据 → ' + q[1] + ' tCO₂e/t');
+    }
     var energy = t.match(
       /(?:综合)?能耗(?:强度)?[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
     );
@@ -634,11 +645,13 @@
     if (energy && /能耗|kgce/i.test(t)) {
       changes.push('综合能耗强度 → ' + energy[1] + ' kgce/t');
     }
-    var intensity = t.match(
-      /(?:碳)?排放强度[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
-    );
-    if (intensity && /强度|碳排|tCO/i.test(t)) {
-      changes.push('碳排放强度 → ' + intensity[1] + ' tCO₂/t');
+    if (!((/烧结/.test(t) && /炼铁/.test(t)) || /重点工序/.test(t))) {
+      var intensity = t.match(
+        /(?:碳)?排放强度[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+      );
+      if (intensity && /强度|碳排|tCO|企业层级|企业级/i.test(t)) {
+        changes.push('碳排放强度 → ' + intensity[1] + ' tCO₂/t');
+      }
     }
     if (!changes.length) changes.push('写入对话补充说明');
     return changes;

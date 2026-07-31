@@ -808,6 +808,34 @@ var JinshenglanData = {
       });
     }
 
+    // 02 · 烧结+炼铁重点工序合并口径（须优先于企业层级强度，避免误匹配）
+    var isProcessQuota =
+      /烧结/.test(t) && /炼铁/.test(t) ||
+      /重点工序/.test(t) ||
+      /烧结工序\s*\+|工序\s*\+\s*炼铁/.test(t);
+    if (isProcessQuota) {
+      var qVal = takeNum(
+        /(?:企业数据|合并口径|碳)?(?:排放)?强度?[^0-9\-]{0,12}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+      );
+      if (qVal == null) {
+        qVal = takeNum(
+          /企业数据[^0-9\-]{0,8}(?:是|为|改成|改为|调整为|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+        );
+      }
+      if (qVal == null) {
+        qVal = takeNum(/(-?[0-9]+(?:\.[0-9]+)?)\s*(?:tCO[₂2]e?)?/i);
+      }
+      if (qVal != null) {
+        qVal = Math.round(qVal * 1000) / 1000;
+        self.reportOverrides = self.reportOverrides || {};
+        self.reportOverrides.quotaCombinedIntensity = qVal;
+        writeAll(function (p) {
+          p.quotaCombinedIntensity = qVal;
+        });
+        changes.push('烧结+炼铁工序企业数据调整为 ' + qVal + ' tCO₂e/t');
+      }
+    }
+
     var energy = takeNum(
       /(?:综合)?能耗(?:强度)?[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
     );
@@ -839,6 +867,12 @@ var JinshenglanData = {
       intensity = takeNum(
         /(?:企业层级|企业级)?[^。；\n]{0,12}(?:碳)?排放强度[^0-9\-]{0,20}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
       );
+    }
+    if (intensity != null && /强度|碳排|tCO|企业层级|企业级/i.test(t)) {
+      // 已识别为工序合并口径时，不再改写企业层级强度
+      if (isProcessQuota && !/企业层级|企业级/.test(t)) {
+        intensity = null;
+      }
     }
     if (intensity != null && /强度|碳排|tCO|企业层级|企业级/i.test(t)) {
       var iVal = Math.round(intensity * 10000) / 10000;

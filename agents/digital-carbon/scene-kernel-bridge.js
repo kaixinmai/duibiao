@@ -989,6 +989,45 @@
           Math.round((Number(model.enterpriseIntensity) + adj) * 1000) / 1000;
       }
 
+      // 02 · 烧结+炼铁重点工序：使用对话修正后的企业数据
+      var quotaLive =
+        profile && profile.quotaCombinedIntensity != null
+          ? Number(profile.quotaCombinedIntensity)
+          : data.reportOverrides && data.reportOverrides.quotaCombinedIntensity != null
+            ? Number(data.reportOverrides.quotaCombinedIntensity)
+            : null;
+      if (quotaLive != null && model.quotaCombined) {
+        var qc = Object.assign({}, model.quotaCombined, {
+          intensity: Math.round(quotaLive * 1000) / 1000,
+        });
+        model.quotaCombined = qc;
+        var qGapProvince = Math.round((qc.provinceAvg - qc.intensity) * 1000) / 1000;
+        var qGapIndustry = Math.round((qc.industryAvg - qc.intensity) * 1000) / 1000;
+        var qGapAdvanced = Math.round((qc.industryAdvanced - qc.intensity) * 1000) / 1000;
+        model.quotaAnalysis =
+          '横向对标显示，本统计周期「' +
+          qc.name +
+          '」合并口径碳排放强度为 ' +
+          qc.intensity +
+          ' tCO₂e/t炼铁工序产品，低于' +
+          model.provinceName +
+          '省均值（' +
+          qc.provinceAvg +
+          '，低 ' +
+          qGapProvince +
+          '）、行业均值（' +
+          qc.industryAvg +
+          '，低 ' +
+          qGapIndustry +
+          '），但距行业先进值（' +
+          qc.industryAdvanced +
+          '）仍相差约 ' +
+          Math.abs(qGapAdvanced) +
+          '，行业排名第 ' +
+          qc.rank +
+          ' 位。本版已按对话补充修订该企业数据。';
+      }
+
       model.positioning =
         '本报告为湖北金盛兰冶金科技有限公司（金盛兰钢铁）专属智能对标分析专项报告，在碳排放强度与工序对标之外，系统展开能耗对标、产量对标、规模对标与生产设施对标；' +
         '能耗对标综合采用 T/CISA 293-2022、T/CISA 416-2024、GB/T 28924-2023、GB 21256-2025 与发改产业〔2023〕723号；' +
