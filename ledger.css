@@ -293,7 +293,7 @@ html, body {
   transform: translate(-50%, -50%);
 }
 
-/* 智能体贴住中间地图左下角，静态形象常驻不消失（对齐数字碳表逻辑） */
+/* 智能体贴住中间地图左下角，静态形象常驻不消失（对齐数字碳表样式） */
 .ld-map .demo-agent--ledger {
   position: absolute;
   left: 12px;
@@ -302,9 +302,11 @@ html, body {
   transform: none;
   z-index: 6;
   max-width: calc(100% - 16px);
+  display: flex;
+  flex-direction: row;
   justify-content: flex-start;
   align-items: flex-end;
-  gap: 6px;
+  gap: 8px;
   line-height: 0;
   font-size: 0;
 }
@@ -318,14 +320,28 @@ html, body {
   display: block;
   margin: 0;
   vertical-align: bottom;
+  opacity: 1 !important;
+  visibility: visible !important;
   filter: drop-shadow(0 4px 16px rgba(0, 40, 100, 0.55));
+  animation: ld-agent-float 3.2s ease-in-out infinite;
+}
+
+@keyframes ld-agent-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.ld-map .demo-agent--ledger:hover .demo-agent__avatar {
+  animation-play-state: paused;
 }
 
 .ld-map .demo-agent--ledger .demo-agent__bubble {
-  margin: 0 0 110px;
-  max-width: 220px;
+  position: relative;
+  margin: 0 0 120px;
+  max-width: 240px;
   font-size: 15px;
   line-height: 1.45;
+  flex-shrink: 1;
 }
 
 .ld-asset-grid {
