@@ -929,103 +929,18 @@
         ? profile.steelOutput
         : Math.round((profile.steelOutput / 12) * 10) / 10;
 
-      // 企业层级强度一律以数据包最新底数为准（含对话修正），不再沿用首次 rankingMeta
-      if (profile && profile.co2Intensity != null) {
+      // 通用自我修正：将对话 overrides + 最新底数统一灌入报告模型
+      if (global.ReportRevisionEngine && global.ReportRevisionEngine.applyToModel) {
+        global.ReportRevisionEngine.applyToModel(model, data, profile);
+      } else if (profile && profile.co2Intensity != null) {
         var liveIntensity = Number(profile.co2Intensity);
-        // 对话修正写入的是绝对值；上传材料校正才叠加 intensityAdj
         if (adj && profile.source !== 'chat-revision') {
           liveIntensity = Math.round((liveIntensity + adj) * 10000) / 10000;
-        } else {
-          liveIntensity = Math.round(liveIntensity * 10000) / 10000;
         }
         model.enterpriseIntensity = liveIntensity;
-
-        var provinceAvg = Number(model.provinceAvg) || 1.977;
-        var industryAvg = Number(model.industryAvg) || 1.95;
-        var industryAdvanced = Number(model.industryAdvanced) || 1.901;
-        var gapToAdvanced = Math.round((liveIntensity - industryAdvanced) * 1000) / 1000;
-        var betterThanProvince = Math.round((provinceAvg - liveIntensity) * 1000) / 1000;
-        var betterThanIndustry = Math.round((industryAvg - liveIntensity) * 1000) / 1000;
-        var rank = model.enterpriseRank || 1;
-        var total = model.totalEnterprises || 232;
-        model.enterpriseAnalysis =
-          gapToAdvanced > 0
-            ? '企业层级碳排放强度为 ' +
-              liveIntensity +
-              ' tCO₂/t，优于' +
-              model.provinceName +
-              '省均值（' +
-              provinceAvg +
-              ' tCO₂/t，低 ' +
-              betterThanProvince +
-              '）与全国行业均值（' +
-              industryAvg +
-              ' tCO₂/t，低 ' +
-              betterThanIndustry +
-              '），在纳入全国碳市场的约 ' +
-              total +
-              ' 家长流程钢铁企业中排名第 ' +
-              rank +
-              ' 位。相较行业先进值 ' +
-              industryAdvanced +
-              ' tCO₂/t，仍高出约 ' +
-              gapToAdvanced +
-              ' tCO₂/t。' +
-              (data.learningNotes && data.learningNotes.length
-                ? '本版已按对话补充 / 上传材料完成指标修订。'
-                : '')
-            : '企业层级碳排放强度为 ' +
-              liveIntensity +
-              ' tCO₂/t，已优于' +
-              model.provinceName +
-              '省均值、行业均值及行业先进值，排名第 ' +
-              rank +
-              ' 位。' +
-              (data.learningNotes && data.learningNotes.length
-                ? '本版已按对话补充 / 上传材料完成指标修订。'
-                : '');
       } else if (adj) {
         model.enterpriseIntensity =
           Math.round((Number(model.enterpriseIntensity) + adj) * 1000) / 1000;
-      }
-
-      // 02 · 烧结+炼铁重点工序：使用对话修正后的企业数据
-      var quotaLive =
-        profile && profile.quotaCombinedIntensity != null
-          ? Number(profile.quotaCombinedIntensity)
-          : data.reportOverrides && data.reportOverrides.quotaCombinedIntensity != null
-            ? Number(data.reportOverrides.quotaCombinedIntensity)
-            : null;
-      if (quotaLive != null && model.quotaCombined) {
-        var qc = Object.assign({}, model.quotaCombined, {
-          intensity: Math.round(quotaLive * 1000) / 1000,
-        });
-        model.quotaCombined = qc;
-        var qGapProvince = Math.round((qc.provinceAvg - qc.intensity) * 1000) / 1000;
-        var qGapIndustry = Math.round((qc.industryAvg - qc.intensity) * 1000) / 1000;
-        var qGapAdvanced = Math.round((qc.industryAdvanced - qc.intensity) * 1000) / 1000;
-        model.quotaAnalysis =
-          '横向对标显示，本统计周期「' +
-          qc.name +
-          '」合并口径碳排放强度为 ' +
-          qc.intensity +
-          ' tCO₂e/t炼铁工序产品，低于' +
-          model.provinceName +
-          '省均值（' +
-          qc.provinceAvg +
-          '，低 ' +
-          qGapProvince +
-          '）、行业均值（' +
-          qc.industryAvg +
-          '，低 ' +
-          qGapIndustry +
-          '），但距行业先进值（' +
-          qc.industryAdvanced +
-          '）仍相差约 ' +
-          Math.abs(qGapAdvanced) +
-          '，行业排名第 ' +
-          qc.rank +
-          ' 位。本版已按对话补充修订该企业数据。';
       }
 
       model.positioning =
@@ -1081,6 +996,11 @@
         '<div class="section" id="s5"><h2>05 · 优势与短板</h2>',
         model.extraSectionsHTML + '<div class="section" id="s5"><h2>05 · 优势与短板</h2>'
       );
+
+      // 兜底：对扩展表等未完全建模字段，按对话修正日志尝试替换同行数值
+      if (global.ReportRevisionEngine && global.ReportRevisionEngine.patchReportHTML) {
+        html = global.ReportRevisionEngine.patchReportHTML(html, pack());
+      }
 
       return html;
     };

@@ -762,181 +762,57 @@ var JinshenglanData = {
   },
 
   /**
-   * 报告生成后的对话补充修正：直接改写对应周期底数，不再走检索
-   * 同年份的月度键（如 2026-06）一并同步，避免报告仍读旧值
-   * @returns {{ period: string, changes: string[], note: string }|null}
+   * 报告生成后的对话补充修正：委托通用自我修正引擎
+   * （识别任意指标 + 正确值，写入覆盖层并同步周期底数）
    */
   applyChatRevision: function (text, periodHint) {
-    var t = String(text || '').replace(/,/g, '');
-    if (!t.trim()) return null;
-
-    var yearMatch = t.match(/(20\d{2})\s*年?/);
     var hint = String(periodHint || new Date().getFullYear());
+    var yearMatch = String(text || '').match(/(20\d{2})\s*年?/);
     var period = yearMatch ? yearMatch[1] : hint;
-    var year = String(period).slice(0, 4);
+    var profile = this.getPeriod(period);
+    var modelHint = {
+      provinceName: /河北/.test(String(this.region || '') + String(this.legalEntity || ''))
+        ? '河北'
+        : '湖北',
+      enterpriseIntensity: profile.co2Intensity,
+      quotaCombined: {
+        name: '烧结工序+炼铁工序',
+        intensity: profile.quotaCombinedIntensity != null ? profile.quotaCombinedIntensity : 1.658,
+        rank: 86,
+        provinceAvg: 1.812,
+        industryAvg: 1.745,
+        industryAdvanced: 1.52,
+      },
+      processRanks: [
+        { name: '焦化工序' },
+        { name: '球团工序' },
+        { name: '烧结工序' },
+        { name: '高炉炼铁' },
+        { name: '转炉炼钢' },
+        { name: '辅助生产工序' },
+      ],
+    };
 
-    var keys = {};
-    keys[year] = true;
-    if (/^\d{4}-\d{2}$/.test(period)) keys[period] = true;
-    Object.keys(this.periods).forEach(function (k) {
-      if (k === year || k.indexOf(year + '-') === 0) keys[k] = true;
-    });
-
-    var self = this;
-    Object.keys(keys).forEach(function (k) {
-      if (!self.periods[k]) {
-        var base = self.getPeriod(k);
-        self.periods[k] = JSON.parse(JSON.stringify(base));
-        self.periods[k].year = year;
-        if (/^\d{4}-\d{2}$/.test(k)) self.periods[k].month = k.slice(5, 7);
-      }
-      self.periods[k].source = 'chat-revision';
-    });
-
-    var primaryKey = this.periods[period] ? period : year;
-    var target = this.periods[primaryKey];
-    var changes = [];
-
-    function takeNum(re) {
-      var m = t.match(re);
-      return m ? parseFloat(m[1]) : null;
+    if (typeof window !== 'undefined' && window.ReportRevisionEngine) {
+      var result = window.ReportRevisionEngine.applyChatText(this, text, modelHint, profile);
+      if (result && !result.period) result.period = String(period).slice(0, 4);
+      return result;
     }
 
-    function writeAll(mutator) {
-      Object.keys(keys).forEach(function (k) {
-        mutator(self.periods[k]);
-      });
-    }
-
-    // 02 · 烧结+炼铁重点工序合并口径（须优先于企业层级强度，避免误匹配）
-    var isProcessQuota =
-      /烧结/.test(t) && /炼铁/.test(t) ||
-      /重点工序/.test(t) ||
-      /烧结工序\s*\+|工序\s*\+\s*炼铁/.test(t);
-    if (isProcessQuota) {
-      var qVal = takeNum(
-        /(?:企业数据|合并口径|碳)?(?:排放)?强度?[^0-9\-]{0,12}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
-      );
-      if (qVal == null) {
-        qVal = takeNum(
-          /企业数据[^0-9\-]{0,8}(?:是|为|改成|改为|调整为|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
-        );
-      }
-      if (qVal == null) {
-        qVal = takeNum(/(-?[0-9]+(?:\.[0-9]+)?)\s*(?:tCO[₂2]e?)?/i);
-      }
-      if (qVal != null) {
-        qVal = Math.round(qVal * 1000) / 1000;
-        self.reportOverrides = self.reportOverrides || {};
-        self.reportOverrides.quotaCombinedIntensity = qVal;
-        writeAll(function (p) {
-          p.quotaCombinedIntensity = qVal;
-        });
-        changes.push('烧结+炼铁工序企业数据调整为 ' + qVal + ' tCO₂e/t');
-      }
-    }
-
-    var energy = takeNum(
-      /(?:综合)?能耗(?:强度)?[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
-    );
-    if (energy == null) {
-      energy = takeNum(/(-?[0-9]+(?:\.[0-9]+)?)\s*kgce\s*\/?\s*t/i);
-    }
-    if (energy != null && /能耗|kgce/i.test(t)) {
-      var eVal = Math.round(energy * 10) / 10;
-      writeAll(function (p) {
-        p.energyPerTon = eVal;
-        if (p.crudeSteelOutput) {
-          p.energyTotal =
-            Math.round((p.energyPerTon * p.crudeSteelOutput) / 1000 * 100) / 100;
-        }
-      });
-      changes.push('综合能耗强度调整为 ' + eVal + ' kgce/t');
-    }
-
-    var intensity = takeNum(
-      /(?:碳)?排放强度[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
-    );
-    if (intensity == null && /tCO[₂2]\s*\/\s*t/i.test(t)) {
-      intensity = takeNum(/(-?[0-9]+(?:\.[0-9]+)?)\s*tCO[₂2]\s*\/\s*t/i);
-    }
-    if (
-      intensity == null &&
-      /(?:企业层级|企业级)?[^。；\n]{0,8}(?:碳)?排放强度/.test(t)
-    ) {
-      intensity = takeNum(
-        /(?:企业层级|企业级)?[^。；\n]{0,12}(?:碳)?排放强度[^0-9\-]{0,20}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
-      );
-    }
-    if (intensity != null && /强度|碳排|tCO|企业层级|企业级/i.test(t)) {
-      // 已识别为工序合并口径时，不再改写企业层级强度
-      if (isProcessQuota && !/企业层级|企业级/.test(t)) {
-        intensity = null;
-      }
-    }
-    if (intensity != null && /强度|碳排|tCO|企业层级|企业级/i.test(t)) {
-      var iVal = Math.round(intensity * 10000) / 10000;
-      writeAll(function (p) {
-        p.co2Intensity = iVal;
-        if (p.crudeSteelOutput) {
-          p.co2Emission = Math.round(iVal * p.crudeSteelOutput * 100) / 100;
-        }
-      });
-      changes.push('碳排放强度调整为 ' + iVal + ' tCO₂/t');
-    }
-
-    var crude = takeNum(
-      /粗钢(?:产量)?[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
-    );
-    if (crude != null) {
-      var cVal = Math.round(crude * 100) / 100;
-      writeAll(function (p) {
-        if (!p.month) p.crudeSteelOutput = cVal;
-      });
-      changes.push('粗钢产量调整为 ' + cVal + ' 万吨');
-    }
-
-    var steel = takeNum(
-      /(?:钢材|成材)(?:产量)?[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
-    );
-    if (steel != null) {
-      var sVal = Math.round(steel * 100) / 100;
-      writeAll(function (p) {
-        if (!p.month) p.steelOutput = sVal;
-      });
-      changes.push('钢材产量调整为 ' + sVal + ' 万吨');
-    }
-
-    var scrap = takeNum(
-      /废钢比[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
-    );
-    if (scrap != null) {
-      var scVal = Math.round(scrap * 10000) / 10000;
-      writeAll(function (p) {
-        p.scrapPerTonSteel = scVal;
-      });
-      changes.push('废钢比调整为 ' + scVal + ' t/t');
-    }
-
-    if (!changes.length) {
-      changes.push('已记录补充说明，并据此修订报告相关表述');
-    }
-
-    var note =
-      '根据对话补充（' +
-      primaryKey +
-      '）：' +
-      changes.join('；') +
-      '。已覆盖写入对标底数（含同年月度口径），无需重新检索。';
+    // 引擎未加载时的最小兜底
+    if (!this.learningNotes) this.learningNotes = [];
     this.learningNotes.push({
       file: '对话补充',
       title: '对话修正',
-      note: note,
-      advice: '已按最新对话修正更新报告指标，请以修订版报告为准复核强度 / 能耗相关结论。',
+      note: String(text || ''),
+      advice: '请加载报告自我修正引擎后重试。',
       intensityAdj: 0,
       source: 'chat',
     });
-
-    return { period: primaryKey, changes: changes, note: note, target: target };
+    return {
+      period: String(period).slice(0, 4),
+      changes: ['已记录补充说明'],
+      note: String(text || ''),
+    };
   },
 };
