@@ -2,12 +2,36 @@
  * 数字碳表 · 金盛兰对标内核
  * 三类数据：客户自有 / 佳华自有（绿字+机器人推演） / 互联网公开
  * 自然语言年度对标 → 思考过程 → 智能报告；支持上传材料学习修订
+ * 报告已生成后的追加对话 → 补充修正（跳过重复检索）
  */
 (function (global) {
   'use strict';
 
+  /** @type {{ chartId: string, period: string, timeDimension: string }|null} */
+  var lastReportMeta = null;
+  /** 最近一次对话修正摘要，供思考步骤展示 */
+  var lastRevisionSummary = null;
+  var REPORT_META_KEY = 'jsl-duibiao-report-meta';
+
   function data() {
     return global.JinshenglanData;
+  }
+
+  function persistReportMeta(meta) {
+    lastReportMeta = meta || null;
+    try {
+      if (meta) sessionStorage.setItem(REPORT_META_KEY, JSON.stringify(meta));
+      else sessionStorage.removeItem(REPORT_META_KEY);
+    } catch (e) {}
+  }
+
+  function loadReportMeta() {
+    if (lastReportMeta && lastReportMeta.chartId) return lastReportMeta;
+    try {
+      var raw = sessionStorage.getItem(REPORT_META_KEY);
+      if (raw) lastReportMeta = JSON.parse(raw);
+    } catch (e) {}
+    return lastReportMeta;
   }
 
   function resolveYearPeriod(text) {
@@ -27,6 +51,32 @@
 
   function detectUploadLearnIntent(text) {
     return /上传|学习|更新报告|修订报告|调整报告|重新生成/.test(String(text || ''));
+  }
+
+  function hasActiveReport() {
+    var meta = loadReportMeta();
+    if (meta && meta.chartId) return true;
+    try {
+      if (document.querySelector('.jsl-report-ready')) return true;
+      if (document.querySelector('[data-action="preview-report"]')) return true;
+      var titles = document.querySelectorAll('.jsl-report-ready__title');
+      for (var i = 0; i < titles.length; i++) {
+        if (/报告已生成|报告已更新/.test(titles[i].textContent || '')) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  /** 报告已生成后的追加对话：视为对报告的补充修正，不再重复检索 */
+  function shouldSkipRetrieval(text) {
+    if (!hasActiveReport()) return false;
+    var t = String(text || '').trim();
+    if (!t) return false;
+    return true;
+  }
+
+  function detectReportRevisionIntent(text) {
+    return shouldSkipRetrieval(text);
   }
 
   /**
@@ -426,6 +476,19 @@
   }
 
   function getQueryPhaseConfig(userText) {
+    if (shouldSkipRetrieval(userText)) {
+      return {
+        modifier: 'cta-thinking--query cta-thinking--revise',
+        title: '报告修订中…',
+        doneTitle: '报告内容修订',
+        hint: '沿用已生成报告底数 · 按对话补充修正，不再重复检索',
+        collapsible: true,
+        collapseOnDone: false,
+        defaultDelay: 280,
+        stepDelay: 360,
+        skip: true,
+      };
+    }
     var keywords = extractKeywords(userText);
     return {
       modifier: 'cta-thinking--query cta-thinking--kw-compact',
@@ -439,9 +502,36 @@
     };
   }
 
+  function getAnalysisPhaseConfig(userText) {
+    if (shouldSkipRetrieval(userText)) {
+      return {
+        modifier: 'cta-thinking--analysis cta-thinking--revise',
+        title: '应用补充修正中…',
+        doneTitle: '修正已应用',
+        hint: '将对话中的指标与说明写入报告，并生成修订版',
+        collapsible: true,
+        collapseOnDone: false,
+        defaultDelay: 420,
+        startDelay: 200,
+      };
+    }
+    return null;
+  }
+
   function getAnalysisSteps(userText) {
     var pack = data();
     if (!pack) return null;
+    if (shouldSkipRetrieval(userText)) {
+      var tip =
+        (lastRevisionSummary && lastRevisionSummary.changes
+          ? lastRevisionSummary.changes.join('；')
+          : '') || '按对话补充修订报告结论';
+      return [
+        { id: 'r1', text: '识别对话中的补充 / 修正项' },
+        { id: 'r2', text: tip.length > 48 ? tip.slice(0, 48) + '…' : tip },
+        { id: 'r3', text: '更新智能对标分析报告（跳过重复检索）' },
+      ];
+    }
     if (!detectYearlyBenchmarkIntent(userText) && !detectUploadLearnIntent(userText)) {
       return null;
     }
@@ -455,6 +545,10 @@
   function getQuerySteps(userText) {
     var pack = data();
     if (!pack) return null;
+
+    if (shouldSkipRetrieval(userText)) {
+      return [];
+    }
 
     bindKeywordSearchToggle();
 
@@ -509,22 +603,55 @@
       var slots = BenchmarkSlotFilling.slots;
       slots.industry = '钢铁';
       slots.objectDimension = 'enterprise';
-      if (detectYearlyBenchmarkIntent(text) || /今年|本年|年度/.test(text)) {
-        slots.timeDimension = 'yearly';
-        slots.timeValue = resolveYearPeriod(text);
+      if (detectYearlyBenchmarkIntent(text) || /今年|本年|年度/.test(text) || shouldSkipRetrieval(text)) {
+        slots.timeDimension =
+          (lastReportMeta && lastReportMeta.timeDimension) || slots.timeDimension || 'yearly';
+        slots.timeValue =
+          (lastReportMeta && lastReportMeta.period) ||
+          resolveYearPeriod(text) ||
+          slots.timeValue;
         slots.functionType = 'comparison';
         slots.queryFocus = 'comprehensive';
       }
     }
+
+    // 预解析修正文案，供思考步骤展示（真正写入在 afterResult 里幂等处理）
+    if (shouldSkipRetrieval(text) && pack.applyChatRevision) {
+      lastRevisionSummary = {
+        preview: true,
+        changes: previewRevisionChanges(text),
+      };
+    }
+  }
+
+  function previewRevisionChanges(text) {
+    var t = String(text || '').replace(/,/g, '');
+    var changes = [];
+    var energy = t.match(
+      /(?:综合)?能耗(?:强度)?[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+    );
+    if (!energy) energy = t.match(/(-?[0-9]+(?:\.[0-9]+)?)\s*kgce\s*\/?\s*t/i);
+    if (energy && /能耗|kgce/i.test(t)) {
+      changes.push('综合能耗强度 → ' + energy[1] + ' kgce/t');
+    }
+    var intensity = t.match(
+      /(?:碳)?排放强度[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+    );
+    if (intensity && /强度|碳排|tCO/i.test(t)) {
+      changes.push('碳排放强度 → ' + intensity[1] + ' tCO₂/t');
+    }
+    if (!changes.length) changes.push('写入对话补充说明');
+    return changes;
   }
 
   function shouldDeliverChatResult(text) {
+    if (shouldSkipRetrieval(text)) return false;
     if (detectYearlyBenchmarkIntent(text)) return false;
     if (detectUploadLearnIntent(text) && data() && data().uploads.length) return false;
     return true;
   }
 
-  function appendReportReadyCard(chartId, period, grainLabel) {
+  function appendReportReadyCard(chartId, period, grainLabel, opts) {
     var messages = document.getElementById('cta-messages');
     var welcome = document.getElementById('cta-welcome');
     if (!messages) return;
@@ -539,20 +666,28 @@
       var parts = periodShow.split('-');
       periodShow = parts[0] + '年' + parseInt(parts[1], 10) + '月';
     }
+    var updated = opts && opts.updated;
+    var extra = (opts && opts.extraDesc) || '';
     var wrap = document.createElement('div');
     wrap.className = 'cta-msg is-assistant cta-msg--full';
     wrap.innerHTML =
       '<div class="cta-msg__bubble cta-msg__bubble--wide">' +
       '<div class="jsl-report-ready">' +
       '<div class="jsl-report-ready__main">' +
-      '<p class="jsl-report-ready__title">智能对标分析报告已生成</p>' +
+      '<p class="jsl-report-ready__title">' +
+      (updated ? '智能对标分析报告已更新' : '智能对标分析报告已生成') +
+      '</p>' +
       '<p class="jsl-report-ready__desc">' +
       escHtml(pack.enterpriseName) +
       ' · ' +
       escHtml(periodShow) +
       '（' +
       escHtml(grain) +
-      '）· 工序 / 能耗 / 产量 / 规模 / 设施对标，请通过报告查看完整分析</p>' +
+      '）· ' +
+      (extra
+        ? escHtml(extra) + ' · '
+        : '') +
+      '工序 / 能耗 / 产量 / 规模 / 设施对标，请通过报告查看完整分析</p>' +
       '</div>' +
       '<button type="button" class="jsl-report-ready__btn" data-action="preview-report" data-chart-id="' +
       escHtml(chartId) +
@@ -566,7 +701,8 @@
   function afterResult(text, result) {
     var yearly = detectYearlyBenchmarkIntent(text);
     var forceReport = detectUploadLearnIntent(text) && data() && data().uploads.length;
-    if (!yearly && !forceReport) return;
+    var revision = detectReportRevisionIntent(text);
+    if (!yearly && !forceReport && !revision) return;
     if (typeof BenchmarkReport === 'undefined' || !BenchmarkReport.openPreviewInNewTab) return;
 
     var pack = data();
@@ -575,10 +711,22 @@
       (typeof BenchmarkSlotFilling !== 'undefined' ? BenchmarkSlotFilling.getSlots() : {}) ||
       {};
     var period =
+      (revision && lastReportMeta && lastReportMeta.period) ||
       slots.timeValue ||
       resolveYearPeriod(text) ||
       String(new Date().getFullYear());
-    var timeDimension = slots.timeDimension || (yearly ? 'yearly' : '');
+    var timeDimension =
+      slots.timeDimension ||
+      (lastReportMeta && lastReportMeta.timeDimension) ||
+      (yearly || revision ? 'yearly' : '');
+
+    var revisionResult = null;
+    if (revision && pack.applyChatRevision) {
+      revisionResult = pack.applyChatRevision(text, period);
+      if (revisionResult && revisionResult.period) period = revisionResult.period;
+      lastRevisionSummary = revisionResult;
+    }
+
     var chartId = 'jsl-report-' + Date.now();
     var payload = {
       result: result,
@@ -595,6 +743,7 @@
           ? BenchmarkSlotFilling.buildSummary()
           : '',
       generatedAt: new Date().toISOString(),
+      revision: !!revision,
     };
 
     if (
@@ -604,26 +753,50 @@
       global.BenchmarkResultCard.storePayload(chartId, payload);
     }
 
+    lastReportMeta = {
+      chartId: chartId,
+      period: String(period).slice(0, 4),
+      timeDimension: timeDimension || 'yearly',
+    };
+    persistReportMeta(lastReportMeta);
+
     var grainLabel =
       timeDimension === 'monthly' || /^\d{4}-\d{2}$/.test(String(period))
         ? '月度'
         : timeDimension === 'quarterly'
           ? '季度'
           : '年度';
-    appendReportReadyCard(chartId, period, grainLabel);
+    appendReportReadyCard(chartId, period, grainLabel, {
+      updated: !!revision,
+      extraDesc:
+        revisionResult && revisionResult.changes && revisionResult.changes.length
+          ? revisionResult.changes[0]
+          : '',
+    });
+  }
+
+  function onSessionReset() {
+    lastReportMeta = null;
+    lastRevisionSummary = null;
+    persistReportMeta(null);
   }
 
   global.DemoSceneKernel = {
     id: 'digital-carbon-jinshenglan',
     resolveYearPeriod: resolveYearPeriod,
     detectYearlyBenchmarkIntent: detectYearlyBenchmarkIntent,
+    detectReportRevisionIntent: detectReportRevisionIntent,
+    shouldSkipRetrieval: shouldSkipRetrieval,
+    hasActiveReport: hasActiveReport,
     gatherSources: gatherSources,
     extractKeywords: extractKeywords,
     getQuerySteps: getQuerySteps,
     getQueryPhaseConfig: getQueryPhaseConfig,
     getAnalysisSteps: getAnalysisSteps,
+    getAnalysisPhaseConfig: getAnalysisPhaseConfig,
     shouldDeliverChatResult: shouldDeliverChatResult,
     beforeHandle: beforeHandle,
     afterResult: afterResult,
+    onSessionReset: onSessionReset,
   };
 })(window);

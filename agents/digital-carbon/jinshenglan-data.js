@@ -760,4 +760,114 @@ var JinshenglanData = {
       })
       .join('\n');
   },
+
+  /**
+   * 报告生成后的对话补充修正：直接改写对应周期底数，不再走检索
+   * @returns {{ period: string, changes: string[] }|null}
+   */
+  applyChatRevision: function (text, periodHint) {
+    var t = String(text || '').replace(/,/g, '');
+    if (!t.trim()) return null;
+
+    var yearMatch = t.match(/(20\d{2})\s*年?/);
+    var period = yearMatch
+      ? yearMatch[1]
+      : String(periodHint || new Date().getFullYear()).slice(0, 4);
+    if (!this.periods[period]) {
+      var base = this.getPeriod(period);
+      this.periods[period] = JSON.parse(JSON.stringify(base));
+      this.periods[period].year = period;
+      this.periods[period].source = 'chat-revision';
+    }
+    var target = this.periods[period];
+    var changes = [];
+
+    function takeNum(re) {
+      var m = t.match(re);
+      return m ? parseFloat(m[1]) : null;
+    }
+
+    var energy = takeNum(
+      /(?:综合)?能耗(?:强度)?[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+    );
+    if (energy == null) {
+      energy = takeNum(/(-?[0-9]+(?:\.[0-9]+)?)\s*kgce\s*\/?\s*t/i);
+    }
+    if (energy != null && /能耗|kgce/i.test(t)) {
+      target.energyPerTon = Math.round(energy * 10) / 10;
+      if (target.crudeSteelOutput) {
+        target.energyTotal =
+          Math.round((target.energyPerTon * target.crudeSteelOutput) / 1000 * 100) / 100;
+      }
+      changes.push('综合能耗强度调整为 ' + target.energyPerTon + ' kgce/t');
+    }
+
+    var intensity = takeNum(
+      /(?:碳)?排放强度[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+    );
+    if (intensity == null && /tCO[₂2]\s*\/\s*t/i.test(t)) {
+      intensity = takeNum(/(-?[0-9]+(?:\.[0-9]+)?)\s*tCO[₂2]\s*\/\s*t/i);
+    }
+    if (
+      intensity == null &&
+      /(?:企业层级|企业级)?[^。；\n]{0,8}(?:碳)?排放强度/.test(t)
+    ) {
+      intensity = takeNum(
+        /(?:企业层级|企业级)?[^。；\n]{0,12}(?:碳)?排放强度[^0-9\-]{0,20}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+      );
+    }
+    if (intensity != null && /强度|碳排|tCO|企业层级|企业级/i.test(t)) {
+      target.co2Intensity = Math.round(intensity * 10000) / 10000;
+      if (target.crudeSteelOutput) {
+        target.co2Emission =
+          Math.round(target.co2Intensity * target.crudeSteelOutput * 100) / 100;
+      }
+      changes.push('碳排放强度调整为 ' + target.co2Intensity + ' tCO₂/t');
+    }
+
+    var crude = takeNum(
+      /粗钢(?:产量)?[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+    );
+    if (crude != null) {
+      target.crudeSteelOutput = Math.round(crude * 100) / 100;
+      changes.push('粗钢产量调整为 ' + target.crudeSteelOutput + ' 万吨');
+    }
+
+    var steel = takeNum(
+      /(?:钢材|成材)(?:产量)?[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+    );
+    if (steel != null) {
+      target.steelOutput = Math.round(steel * 100) / 100;
+      changes.push('钢材产量调整为 ' + target.steelOutput + ' 万吨');
+    }
+
+    var scrap = takeNum(
+      /废钢比[^0-9\-]{0,16}(?:是|为|改成|改为|调整为|更新为|等于|=|:|：)?\s*(-?[0-9]+(?:\.[0-9]+)?)/
+    );
+    if (scrap != null) {
+      target.scrapPerTonSteel = Math.round(scrap * 10000) / 10000;
+      changes.push('废钢比调整为 ' + target.scrapPerTonSteel + ' t/t');
+    }
+
+    if (!changes.length) {
+      changes.push('已记录补充说明，并据此修订报告相关表述');
+    }
+
+    var note =
+      '根据对话补充（' +
+      period +
+      '年）：' +
+      changes.join('；') +
+      '。已覆盖写入对标底数，无需重新检索。';
+    this.learningNotes.push({
+      file: '对话补充',
+      title: '对话修正',
+      note: note,
+      advice: '已按最新对话修正更新报告指标，请以修订版报告为准复核能耗 / 强度相关结论。',
+      intensityAdj: 0,
+      source: 'chat',
+    });
+
+    return { period: period, changes: changes, note: note };
+  },
 };

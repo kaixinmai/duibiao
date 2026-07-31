@@ -699,6 +699,12 @@
     state.loading = false;
     if (inputEl) inputEl.value = '';
     if (typeof BenchmarkAgent !== 'undefined') BenchmarkAgent.resetSession();
+    if (
+      window.DemoSceneKernel &&
+      typeof window.DemoSceneKernel.onSessionReset === 'function'
+    ) {
+      window.DemoSceneKernel.onSessionReset();
+    }
     syncSendBtn();
   }
 
@@ -910,7 +916,8 @@
       typeof window.DemoSceneKernel.getQuerySteps === 'function'
     ) {
       var customSteps = window.DemoSceneKernel.getQuerySteps(lastUserText);
-      if (customSteps && customSteps.length) return customSteps;
+      // 允许返回空数组：报告修订场景跳过检索步骤
+      if (Array.isArray(customSteps)) return customSteps;
     }
     return getBenchmarkQuerySteps();
   }
@@ -1259,6 +1266,34 @@
       typeof window.DemoSceneKernel.getQueryPhaseConfig === 'function'
         ? window.DemoSceneKernel.getQueryPhaseConfig(lastUserText) || {}
         : {};
+
+    // 报告已生成后的追加修正：跳过信息检索阶段
+    var skipRetrieval =
+      phaseCfg.skip ||
+      (window.DemoSceneKernel &&
+        typeof window.DemoSceneKernel.shouldSkipRetrieval === 'function' &&
+        window.DemoSceneKernel.shouldSkipRetrieval(lastUserText)) ||
+      (Array.isArray(lastQuerySteps) && lastQuerySteps.length === 0);
+    // 兜底：页面上已有报告卡片时，即使内核未就绪也跳过检索
+    if (
+      !skipRetrieval &&
+      window.DemoSceneKernel &&
+      window.DemoSceneKernel.id === 'digital-carbon-jinshenglan'
+    ) {
+      try {
+        if (
+          document.querySelector('.jsl-report-ready') ||
+          document.querySelector('[data-action="preview-report"]')
+        ) {
+          skipRetrieval = true;
+        }
+      } catch (e) {}
+    }
+    if (skipRetrieval) {
+      lastQuerySteps = [];
+      return Promise.resolve();
+    }
+
     var kernelId = window.DemoSceneKernel && window.DemoSceneKernel.id;
     var kernelHint = '';
     if (kernelId === 'digital-carbon-jinshenglan' || (lastQuerySteps[0] && lastQuerySteps[0].id === 'kw-parse')) {

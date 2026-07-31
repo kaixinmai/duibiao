@@ -304,7 +304,7 @@
     var learnBlock = '';
     if (model.learningSummary) {
       learnBlock =
-        '<div class="jsl-learn-banner"><strong>上传材料学习修订</strong><p>' +
+        '<div class="jsl-learn-banner"><strong>对话补充 / 上传材料修订</strong><p>' +
         String(model.learningSummary).replace(/\n/g, '<br>') +
         '</p></div>';
     }
