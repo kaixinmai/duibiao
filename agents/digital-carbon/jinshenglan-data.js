@@ -678,6 +678,7 @@ var JinshenglanData = {
           '结合环评批复边界，建议将转炉二次除尘与烧结脱硫脱硝联锁纳入工序对标短板清单，并同步更新排污许可台账口径。',
         sectionNote:
           '已根据上传《环评报告》校正污染物与设施边界口径，生产设施对标中补充敏感目标防护距离复核结论。',
+        fieldHints: [],
       };
     }
     if (category === 'verify') {
@@ -688,6 +689,10 @@ var JinshenglanData = {
           '已对齐 2020–2023 核查终值（粗钢强度约 1.80 tCO₂/t、综合能耗约 480 kgce/t），后续对标以核查口径为准，并突出炼铁工序排放贡献与废钢提比对强度改善的作用。',
         sectionNote:
           '已根据上传《温室气体排放核查报告》写入产量、排放、强度、工序排放与设施产能等历史底数。',
+        fieldHints: [
+          { hint: '企业层级碳排放强度', value: 1.7983 },
+          { hint: '综合能耗强度', value: 480 },
+        ],
       };
     }
     if (category === 'energy') {
@@ -698,6 +703,7 @@ var JinshenglanData = {
           '已吸收节能减碳分析报告中的高炉喷煤优化与余热回收建议，将焦化、烧结工序能效对标目标上调一档，并写入降碳行动优先级。',
         sectionNote:
           '已根据上传《节能减碳分析报告》更新能耗对标与减排潜力拆分权重，强化高炉—烧结联动技改路径。',
+        fieldHints: [{ hint: '综合能耗强度', value: 465 }],
       };
     }
     return {
@@ -705,28 +711,112 @@ var JinshenglanData = {
       intensityAdj: -0.005,
       advice: '已将上传材料中的关键披露纳入报告修订意见。',
       sectionNote: '已根据上传材料对报告部分结论进行演示性校正。',
+      fieldHints: [],
+    };
+  },
+
+  /**
+   * 解析上传文件文本（演示：优先抽取文中数值；无有效文本则回退类别模板）
+   * @returns {{ summary, delta, changelog: string[], fieldPatches: [{hint,value}], extractedTextPreview }}
+   */
+  parseUploadContent: function (fileName, category, extractedText) {
+    var text = String(extractedText || '');
+    var delta = this.mockLearningDelta(fileName, category);
+    var changelog = [];
+    var fieldPatches = (delta.fieldHints || []).slice();
+
+    function take(re, hint, digits) {
+      var m = text.match(re);
+      if (!m) return;
+      var v = parseFloat(String(m[1]).replace(/,/g, ''));
+      if (isNaN(v)) return;
+      if (digits != null) {
+        var p = Math.pow(10, digits);
+        v = Math.round(v * p) / p;
+      }
+      fieldPatches = fieldPatches.filter(function (f) {
+        return f.hint !== hint;
+      });
+      fieldPatches.push({ hint: hint, value: v });
+      changelog.push('从《' + fileName + '》识别「' + hint + '」= ' + v);
+    }
+
+    if (text.length > 20) {
+      take(
+        /(?:综合)?能耗(?:强度)?[^0-9]{0,12}(-?[0-9]+(?:\.[0-9]+)?)\s*kgce/i,
+        '综合能耗强度',
+        1
+      );
+      take(
+        /(?:碳)?排放强度[^0-9]{0,12}(-?[0-9]+(?:\.[0-9]+)?)\s*t?\s*CO/i,
+        '企业层级碳排放强度',
+        4
+      );
+      take(/粗钢(?:产量)?[^0-9]{0,12}(-?[0-9]+(?:\.[0-9]+)?)\s*万?\s*吨/, '粗钢产量', 2);
+      take(/废钢比[^0-9]{0,8}(-?[0-9]+(?:\.[0-9]+)?)/, '废钢比', 4);
+      take(
+        /烧结[^。；\n]{0,20}炼铁[^。；\n]{0,20}(-?[0-9]+(?:\.[0-9]+)?)/,
+        '烧结工序+炼铁工序企业数据',
+        3
+      );
+    }
+
+    if (!changelog.length) {
+      (delta.fieldHints || []).forEach(function (f) {
+        changelog.push(
+          '依据《' + fileName + '》类别模板，拟将「' + f.hint + '」优化为 ' + f.value
+        );
+      });
+      changelog.push('依据《' + fileName + '》：' + (delta.sectionNote || delta.advice || ''));
+    } else {
+      changelog.push('依据《' + fileName + '》文本解析完成，已映射到报告可修正指标');
+    }
+
+    var summary =
+      (text.length > 40
+        ? '已解析文件文本约 ' + text.length + ' 字，并提取关键指标'
+        : this.mockParseSummary(fileName, category)) +
+      (changelog.length ? '；拟优化 ' + changelog.length + ' 项' : '');
+
+    return {
+      summary: summary,
+      delta: delta,
+      changelog: changelog,
+      fieldPatches: fieldPatches,
+      extractedTextPreview: text.slice(0, 400),
     };
   },
 
   addUpload: function (fileMeta) {
     var cat = fileMeta.category || this.classifyUpload(fileMeta.name);
+    var parsed =
+      fileMeta.parsed ||
+      this.parseUploadContent(fileMeta.name, cat, fileMeta.extractedText || '');
     var item = {
       id: 'up-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
       name: fileMeta.name,
       size: fileMeta.size || 0,
       type: fileMeta.type || '',
       category: cat,
-      summary: fileMeta.summary || this.mockParseSummary(fileMeta.name, cat),
-      delta: this.mockLearningDelta(fileMeta.name, cat),
+      summary: parsed.summary || fileMeta.summary || this.mockParseSummary(fileMeta.name, cat),
+      delta: parsed.delta || this.mockLearningDelta(fileMeta.name, cat),
+      changelog: parsed.changelog || [],
+      fieldPatches: parsed.fieldPatches || [],
+      extractedTextPreview: parsed.extractedTextPreview || '',
       at: new Date().toISOString(),
     };
     this.uploads.push(item);
     this.learningNotes.push({
       file: item.name,
       title: item.delta.title,
-      note: item.delta.sectionNote,
+      note:
+        (item.changelog && item.changelog.length
+          ? item.changelog.join('；')
+          : item.delta.sectionNote) || item.summary,
       advice: item.delta.advice,
       intensityAdj: item.delta.intensityAdj,
+      source: 'upload',
+      changelog: item.changelog.slice(),
     });
     return item;
   },
@@ -739,31 +829,48 @@ var JinshenglanData = {
       return {
         file: u.name,
         title: u.delta.title,
-        note: u.delta.sectionNote,
+        note:
+          (u.changelog && u.changelog.length
+            ? u.changelog.join('；')
+            : u.delta.sectionNote) || u.summary,
         advice: u.delta.advice,
         intensityAdj: u.delta.intensityAdj,
+        source: 'upload',
+        changelog: (u.changelog || []).slice(),
       };
     });
   },
 
-  totalIntensityAdj: function () {
-    return (this.learningNotes || []).reduce(function (sum, n) {
-      return sum + (n.intensityAdj || 0);
-    }, 0);
-  },
-
-  buildLearningSummary: function () {
-    if (!this.learningNotes.length) return '';
-    return this.learningNotes
-      .map(function (n, i) {
-        return i + 1 + '.【' + n.title + '】' + n.note;
-      })
-      .join('\n');
+  /**
+   * 将上传材料的 fieldPatches 应用到报告修正引擎
+   * @returns {{ changes: string[], changelog: string[] }}
+   */
+  applyUploadOptimizations: function (uploadItem, periodHint) {
+    var self = this;
+    var changes = [];
+    var changelog = (uploadItem && uploadItem.changelog ? uploadItem.changelog.slice() : []) || [];
+    var patches = (uploadItem && uploadItem.fieldPatches) || [];
+    if (!patches.length) {
+      return { changes: changelog.slice(), changelog: changelog };
+    }
+    if (typeof window !== 'undefined' && window.ReportRevisionEngine) {
+      patches.forEach(function (p) {
+        var synthetic = String(p.hint || '') + '是' + p.value;
+        var r = window.ReportRevisionEngine.applyChatText(
+          self,
+          synthetic,
+          null,
+          self.getPeriod(periodHint),
+          { silent: true }
+        );
+        if (r && r.changes) changes = changes.concat(r.changes);
+      });
+    }
+    return { changes: changes, changelog: changelog.concat(changes) };
   },
 
   /**
-   * 报告生成后的对话补充修正：委托通用自我修正引擎
-   * （识别任意指标 + 正确值，写入覆盖层并同步周期底数）
+   * 报告生成后的对话补充修正：委托通用自我修正引擎 + 章节显隐
    */
   applyChatRevision: function (text, periodHint) {
     var hint = String(periodHint || new Date().getFullYear());
@@ -793,26 +900,69 @@ var JinshenglanData = {
       ],
     };
 
-    if (typeof window !== 'undefined' && window.ReportRevisionEngine) {
-      var result = window.ReportRevisionEngine.applyChatText(this, text, modelHint, profile);
-      if (result && !result.period) result.period = String(period).slice(0, 4);
-      return result;
+    var changes = [];
+    var sectionChanges = [];
+    if (typeof window !== 'undefined' && window.ReportSectionRegistry) {
+      var intents = window.ReportSectionRegistry.parseSectionIntents(text);
+      sectionChanges = window.ReportSectionRegistry.applyVisibility(this, intents);
+      changes = changes.concat(sectionChanges);
     }
 
-    // 引擎未加载时的最小兜底
+    var metricResult = { changes: [], matches: [], note: '' };
+    if (typeof window !== 'undefined' && window.ReportRevisionEngine) {
+      metricResult = window.ReportRevisionEngine.applyChatText(
+        this,
+        text,
+        modelHint,
+        profile,
+        { silent: true }
+      );
+      if (metricResult && metricResult.changes) {
+        var metricChanges = metricResult.changes.filter(function (c) {
+          if (sectionChanges.length && /已记录补充说明|待核对定位/.test(c)) return false;
+          return true;
+        });
+        changes = changes.concat(metricChanges);
+      }
+    }
+
+    if (!changes.length) {
+      changes.push('已记录补充说明，并据此修订报告相关表述');
+    }
+
+    var note = '根据对话自我修正：' + changes.join('；') + '。';
     if (!this.learningNotes) this.learningNotes = [];
     this.learningNotes.push({
       file: '对话补充',
-      title: '对话修正',
-      note: String(text || ''),
-      advice: '请加载报告自我修正引擎后重试。',
+      title: '对话自我修正',
+      note: note,
+      advice: '已按用户指出的正确数据 / 章节要求完成报告自我修正。',
       intensityAdj: 0,
       source: 'chat',
+      changelog: changes.slice(),
     });
+
     return {
       period: String(period).slice(0, 4),
-      changes: ['已记录补充说明'],
-      note: String(text || ''),
+      changes: changes,
+      note: note,
+      matches: (metricResult && metricResult.matches) || [],
+      sectionChanges: sectionChanges,
     };
+  },
+
+  totalIntensityAdj: function () {
+    return (this.learningNotes || []).reduce(function (sum, n) {
+      return sum + (n.intensityAdj || 0);
+    }, 0);
+  },
+
+  buildLearningSummary: function () {
+    if (!this.learningNotes.length) return '';
+    return this.learningNotes
+      .map(function (n, i) {
+        return i + 1 + '.【' + n.title + '】' + n.note;
+      })
+      .join('\n');
   },
 };

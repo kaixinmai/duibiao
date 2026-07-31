@@ -988,18 +988,31 @@
     global.BenchmarkReport._composeReportHTML = function (payload, chartId) {
       var html = origCompose.call(this, payload, chartId);
       if (!html || !payload || payload.kernel !== 'digital-carbon-jinshenglan') return html;
+      var data = pack();
       var model = this.buildSteelReportModel(payload);
-      if (!model.extraSectionsHTML) return html;
+      var hidden =
+        (payload.hiddenSections && payload.hiddenSections.slice()) ||
+        (data && data.hiddenSections) ||
+        [];
 
-      // 插入扩展章节到「05 · 优势与短板」之前（目录已从报告模板移除）
-      html = html.replace(
-        '<div class="section" id="s5"><h2>05 · 优势与短板</h2>',
-        model.extraSectionsHTML + '<div class="section" id="s5"><h2>05 · 优势与短板</h2>'
-      );
+      if (model.extraSectionsHTML) {
+        var extra = model.extraSectionsHTML;
+        // 扩展章节按 hiddenSections 裁剪
+        if (hidden.length && global.ReportSectionRegistry) {
+          extra = global.ReportSectionRegistry.stripSectionsFromHTML(extra, hidden);
+        }
+        html = html.replace(
+          '<div class="section" id="s5"><h2>05 · 优势与短板</h2>',
+          extra + '<div class="section" id="s5"><h2>05 · 优势与短板</h2>'
+        );
+      }
 
-      // 兜底：对扩展表等未完全建模字段，按对话修正日志尝试替换同行数值
+      if (hidden.length && global.ReportSectionRegistry) {
+        html = global.ReportSectionRegistry.stripSectionsFromHTML(html, hidden);
+      }
+
       if (global.ReportRevisionEngine && global.ReportRevisionEngine.patchReportHTML) {
-        html = global.ReportRevisionEngine.patchReportHTML(html, pack());
+        html = global.ReportRevisionEngine.patchReportHTML(html, data);
       }
 
       return html;
@@ -1029,31 +1042,151 @@
     if (scroll) scroll.scrollTop = scroll.scrollHeight;
   }
 
+  function readFileText(file) {
+    return new Promise(function (resolve) {
+      var reader = new FileReader();
+      var name = String(file.name || '').toLowerCase();
+      var isText =
+        /text\//.test(file.type || '') ||
+        /\.(txt|csv|md|json|log)$/i.test(name);
+      reader.onerror = function () {
+        resolve('');
+      };
+      reader.onload = function () {
+        var result = reader.result;
+        if (typeof result === 'string') {
+          resolve(result);
+          return;
+        }
+        // 二进制：尽量抽可打印中文/ASCII 片段（演示解析）
+        try {
+          var bytes = new Uint8Array(result || []);
+          var out = '';
+          var run = '';
+          for (var i = 0; i < bytes.length; i++) {
+            var b = bytes[i];
+            if (b === 9 || b === 10 || b === 13 || (b >= 32 && b < 127)) {
+              run += String.fromCharCode(b);
+            } else if (b >= 0x80) {
+              // 保留后续 UTF-8 粗提取由 TextDecoder 再试
+              run += '';
+            } else {
+              if (run.length >= 4) out += run + '\n';
+              run = '';
+            }
+          }
+          if (run.length >= 4) out += run;
+          try {
+            var decoded = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+            if (decoded && decoded.replace(/\u0000/g, '').length > out.length) {
+              out = decoded.replace(/\u0000+/g, ' ');
+            }
+          } catch (e2) {}
+          resolve(out.slice(0, 80000));
+        } catch (e) {
+          resolve('');
+        }
+      };
+      if (isText) reader.readAsText(file);
+      else reader.readAsArrayBuffer(file);
+    });
+  }
+
   function handleFiles(fileList) {
     var data = pack();
     if (!data || !fileList || !fileList.length) return;
-    var names = [];
-    Array.prototype.forEach.call(fileList, function (file) {
-      var item = data.addUpload({
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        category: data.classifyUpload(file.name),
+
+    var files = Array.prototype.slice.call(fileList);
+    toast('正在解析 ' + files.length + ' 份材料…');
+
+    Promise.all(
+      files.map(function (file) {
+        return readFileText(file).then(function (text) {
+          return { file: file, text: text };
+        });
+      })
+    ).then(function (parsedFiles) {
+      var items = [];
+      var allChangelog = [];
+      var period =
+        (global.DemoSceneKernel &&
+          global.DemoSceneKernel.hasActiveReport &&
+          global.DemoSceneKernel.hasActiveReport() &&
+          sessionStorage.getItem('jsl-duibiao-report-meta') &&
+          (function () {
+            try {
+              return JSON.parse(sessionStorage.getItem('jsl-duibiao-report-meta')).period;
+            } catch (e) {
+              return null;
+            }
+          })()) ||
+        String(new Date().getFullYear());
+
+      parsedFiles.forEach(function (pf) {
+        var cat = data.classifyUpload(pf.file.name);
+        var item = data.addUpload({
+          name: pf.file.name,
+          size: pf.file.size,
+          type: pf.file.type,
+          category: cat,
+          extractedText: pf.text,
+        });
+        var applied = data.applyUploadOptimizations(item, period);
+        items.push(item);
+        allChangelog = allChangelog.concat(applied.changelog || item.changelog || []);
       });
-      names.push(item.name);
-    });
-    renderUploadChips();
-    toast('已学习 ' + names.length + ' 份材料，可继续对话更新报告');
-    appendAssistantNote(
-      '<p>已完成材料学习：</p><ul>' +
-        names
-          .map(function (n) {
-            return '<li>' + n + '</li>';
+
+      renderUploadChips();
+
+      var hasReport =
+        global.DemoSceneKernel &&
+        global.DemoSceneKernel.hasActiveReport &&
+        global.DemoSceneKernel.hasActiveReport();
+
+      var explain =
+        '<p><strong>已依据上传材料完成解析与报告优化准备</strong></p><ul>' +
+        items
+          .map(function (it) {
+            return (
+              '<li><strong>' +
+              it.name +
+              '</strong>：' +
+              (it.summary || '') +
+              '</li>'
+            );
           })
           .join('') +
-        '</ul><p>我将根据节能减碳分析报告、环评报告等材料，在后续对标报告中修订工序 / 能耗 / 设施等相关结论。' +
-        '您可以继续输入「给我进行一下今年的对标分析」或「根据上传材料更新报告」生成修订版报告。</p>'
-    );
+        '</ul>';
+
+      if (allChangelog.length) {
+        explain +=
+          '<p><strong>依据文件优化 / 修改的内容：</strong></p><ol>' +
+          allChangelog
+            .slice(0, 12)
+            .map(function (c) {
+              return '<li>' + c + '</li>';
+            })
+            .join('') +
+          '</ol>';
+      }
+
+      if (hasReport && global.DemoSceneKernel.regenerateOptimizedReport) {
+        global.DemoSceneKernel.regenerateOptimizedReport({
+          userText: '根据上传材料优化报告',
+          changelog: allChangelog,
+          updated: true,
+        });
+        explain +=
+          '<p>已重新生成<strong>优化版智能对标分析报告</strong>，请点击下方「查看对标分析报告」核对修订结果。</p>';
+        toast('已按上传材料优化并更新报告');
+      } else {
+        explain +=
+          '<p>当前尚未生成报告。请先进行对标分析生成报告；或输入「根据上传材料更新报告」生成修订版。</p>';
+        toast('已学习 ' + items.length + ' 份材料');
+      }
+
+      appendAssistantNote(explain);
+    });
   }
 
   function renderUploadChips() {

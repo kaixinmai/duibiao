@@ -68,15 +68,34 @@
   }
 
   /** 报告已生成后的追加对话：视为对报告的补充修正，不再重复检索 */
+  function isRevisionLanguage(text) {
+    var t = String(text || '');
+    if (!t.trim()) return false;
+    if (
+      /去掉|删除|移除|不要|隐藏|保留|恢复/.test(t) &&
+      /章|节|部分|模块|建议|对标|潜力|来源|能耗|产量|设施|历史/.test(t)
+    ) {
+      return true;
+    }
+    if (/修正|修改|调整|改成|改为|更新为|应该是|正确|优化报告|更新报告/.test(t)) return true;
+    if (/(?:是|为|等于|=)\s*-?[0-9]/.test(t)) return true;
+    if (
+      global.ReportRevisionEngine &&
+      global.ReportRevisionEngine.isContextualFollowUp &&
+      global.ReportRevisionEngine.isContextualFollowUp(t)
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   function shouldSkipRetrieval(text) {
     if (!hasActiveReport()) return false;
-    var t = String(text || '').trim();
-    if (!t) return false;
-    return true;
+    return isRevisionLanguage(text) || detectUploadLearnIntent(text);
   }
 
   function detectReportRevisionIntent(text) {
-    return shouldSkipRetrieval(text);
+    return hasActiveReport() && isRevisionLanguage(text);
   }
 
   /**
@@ -741,6 +760,7 @@
       sources: gatherSources(period),
       learningNotes: (pack.learningNotes || []).slice(),
       uploads: (pack.uploads || []).slice(),
+      hiddenSections: (pack.hiddenSections || []).slice(),
       summary:
         typeof BenchmarkSlotFilling !== 'undefined'
           ? BenchmarkSlotFilling.buildSummary()
@@ -778,6 +798,70 @@
     });
   }
 
+  /**
+   * 上传材料或对话修正后，重新生成优化版报告
+   * @param {{ userText?: string, changelog?: string[], updated?: boolean, result?: object }} opts
+   */
+  function regenerateOptimizedReport(opts) {
+    opts = opts || {};
+    var pack = data();
+    if (!pack) return null;
+    var period =
+      (lastReportMeta && lastReportMeta.period) ||
+      String(new Date().getFullYear());
+    var timeDimension =
+      (lastReportMeta && lastReportMeta.timeDimension) || 'yearly';
+    var profile = pack.getPeriod(period);
+    var resultForReport = opts.result ? Object.assign({}, opts.result) : {};
+    var rankingMeta = Object.assign({}, resultForReport.rankingMeta || {});
+    if (profile && profile.co2Intensity != null) {
+      rankingMeta.intensity = profile.co2Intensity;
+    }
+    resultForReport.rankingMeta = rankingMeta;
+
+    var chartId = 'jsl-report-' + Date.now();
+    var changelog = opts.changelog || [];
+    var payload = {
+      result: resultForReport,
+      period: period,
+      userText: opts.userText || '根据上传材料优化报告',
+      timeDimension: timeDimension,
+      enterpriseName: pack.enterpriseName,
+      kernel: 'digital-carbon-jinshenglan',
+      sources: gatherSources(period),
+      learningNotes: (pack.learningNotes || []).slice(),
+      uploads: (pack.uploads || []).slice(),
+      hiddenSections: (pack.hiddenSections || []).slice(),
+      changelog: changelog.slice(),
+      summary:
+        typeof BenchmarkSlotFilling !== 'undefined'
+          ? BenchmarkSlotFilling.buildSummary()
+          : '',
+      generatedAt: new Date().toISOString(),
+      revision: true,
+    };
+
+    if (
+      typeof global.BenchmarkResultCard !== 'undefined' &&
+      global.BenchmarkResultCard.storePayload
+    ) {
+      global.BenchmarkResultCard.storePayload(chartId, payload);
+    }
+
+    lastReportMeta = {
+      chartId: chartId,
+      period: String(period),
+      timeDimension: timeDimension,
+    };
+    persistReportMeta(lastReportMeta);
+
+    appendReportReadyCard(chartId, period, timeDimension === 'monthly' ? '月度' : '年度', {
+      updated: opts.updated !== false,
+      extraDesc: changelog.length ? changelog[0] : '已按材料完成优化',
+    });
+    return { chartId: chartId, payload: payload, changelog: changelog };
+  }
+
   function onSessionReset() {
     lastReportMeta = null;
     lastRevisionSummary = null;
@@ -786,6 +870,7 @@
     if (pack && global.ReportRevisionEngine && global.ReportRevisionEngine.clear) {
       global.ReportRevisionEngine.clear(pack);
     }
+    if (pack) pack.hiddenSections = [];
   }
 
   global.DemoSceneKernel = {
@@ -804,6 +889,7 @@
     shouldDeliverChatResult: shouldDeliverChatResult,
     beforeHandle: beforeHandle,
     afterResult: afterResult,
+    regenerateOptimizedReport: regenerateOptimizedReport,
     onSessionReset: onSessionReset,
   };
 })(window);

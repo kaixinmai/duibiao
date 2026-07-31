@@ -656,8 +656,9 @@
    * 应用对话修正到数据包
    * @returns {{ changes: string[], matches: array, note: string }}
    */
-  function applyChatText(pack, text, modelHint, profileHint) {
+  function applyChatText(pack, text, modelHint, profileHint, opts) {
     if (!pack) return { changes: [], matches: [], note: '' };
+    opts = opts || {};
     var profile = profileHint || (pack.getPeriod && pack.getPeriod()) || {};
     var model = modelHint || {};
     var catalog = buildCatalog(model, profile);
@@ -669,7 +670,9 @@
 
     matches.forEach(function (m) {
       if (m.unmatched || !m.fieldId) {
-        changes.push('已记录补充「' + (m.hint || m.label) + ' → ' + m.value + '」（待核对定位）');
+        if (!opts.silent) {
+          changes.push('已记录补充「' + (m.hint || m.label) + ' → ' + m.value + '」（待核对定位）');
+        }
         pack.reportOverrideLog.push({
           at: new Date().toISOString(),
           text: text,
@@ -713,7 +716,6 @@
       });
     });
 
-    // 记住本轮命中的指标，供下一轮短回复联动
     if (lastMatched && lastMatched.fieldId) {
       setRevisionContext(pack, {
         fieldId: lastMatched.fieldId,
@@ -724,21 +726,23 @@
       });
     }
 
-    if (!changes.length) {
+    if (!changes.length && !opts.silent) {
       changes.push('已记录补充说明，并据此修订报告相关表述');
     }
 
     var note =
       '根据对话自我修正：' + changes.join('；') + '。已写入报告覆盖层，重新打开报告即可看到更新。';
-    if (!pack.learningNotes) pack.learningNotes = [];
-    pack.learningNotes.push({
-      file: '对话补充',
-      title: '对话自我修正',
-      note: note,
-      advice: '已按用户指出的正确数据完成报告自我修正，请以最新报告为准。',
-      intensityAdj: 0,
-      source: 'chat',
-    });
+    if (!opts.silent) {
+      if (!pack.learningNotes) pack.learningNotes = [];
+      pack.learningNotes.push({
+        file: '对话补充',
+        title: '对话自我修正',
+        note: note,
+        advice: '已按用户指出的正确数据完成报告自我修正，请以最新报告为准。',
+        intensityAdj: 0,
+        source: 'chat',
+      });
+    }
 
     return { changes: changes, matches: matches, note: note };
   }
@@ -880,6 +884,7 @@
     pack.reportOverrides = {};
     pack.reportOverrideLog = [];
     pack.revisionContext = null;
+    pack.hiddenSections = [];
     setRevisionContext(pack, null);
   }
 
