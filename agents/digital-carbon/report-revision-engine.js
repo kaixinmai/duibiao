@@ -391,22 +391,27 @@
       }
     }
 
-    // 去重：同一 hint+value 只保留一条；优先保留带列名的
+    // 去重：同一 hint+value 只保留一条；优先保留带列名的；弱 hint 被强 hint 覆盖则丢弃
     var seen = {};
-    return out
-      .sort(function (a, b) {
-        return (b.columnHint ? 1 : 0) - (a.columnHint ? 1 : 0);
-      })
-      .filter(function (u) {
-        var k = norm(u.hint).replace(/企业数据|行业排名|省平均值|省均值|行业平均值|行业均值|行业先进值|先进值/g, '') + '|' + u.value;
-        if (u.columnHint) k += '|' + norm(u.columnHint);
-        // 无列名时，若已有同值同主体则跳过
-        var soft = norm(u.hint).replace(/企业数据|行业排名|省平均值|省均值|行业平均值|行业均值|行业先进值|先进值/g, '') + '|' + u.value;
-        if (seen[k] || (!u.columnHint && seen[soft + '|企业数据'])) return false;
-        seen[k] = true;
-        if (u.columnHint) seen[soft + '|' + norm(u.columnHint)] = true;
-        return u.hint.length >= 1;
+    var sorted = out.sort(function (a, b) {
+      return (b.columnHint ? 1 : 0) - (a.columnHint ? 1 : 0) || b.hint.length - a.hint.length;
+    });
+    return sorted.filter(function (u, idx) {
+      var dominated = sorted.some(function (o, j) {
+        if (j >= idx) return false;
+        if (o.value !== u.value) return false;
+        var on = norm(o.hint);
+        var un = norm(u.hint);
+        if (o.columnHint && !u.columnHint && on.indexOf(un.slice(0, Math.min(6, un.length))) >= 0) return true;
+        if (on.length > un.length && on.indexOf(un) >= 0) return true;
+        return false;
       });
+      if (dominated) return false;
+      var k = norm(u.hint) + '|' + u.value + '|' + norm(u.columnHint || '');
+      if (seen[k]) return false;
+      seen[k] = true;
+      return u.hint.length >= 1;
+    });
   }
 
   function scoreField(field, utterance) {
@@ -467,12 +472,15 @@
       });
     }
 
-    // 烧结+炼铁应优先命中 quota，而不是企业层级
+    // 烧结+炼铁应优先命中 quota，而不是企业层级或单工序
     if (field.id.indexOf('quota.combined') === 0 && /烧结/.test(hintN) && /炼铁/.test(hintN)) {
       score += 20;
     }
     if (field.id === 'enterprise.intensity' && /烧结/.test(hintN) && /炼铁/.test(hintN)) {
       score -= 20;
+    }
+    if (field.id.indexOf('process.') === 0 && /烧结/.test(hintN) && /炼铁/.test(hintN)) {
+      score -= 25;
     }
     if (field.id === 'enterprise.intensity' && /企业层级|企业级|碳排放强度/.test(hintN) && !/烧结|炼铁/.test(hintN)) {
       score += 12;
