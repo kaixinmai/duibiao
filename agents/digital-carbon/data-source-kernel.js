@@ -631,7 +631,7 @@
         (lastReportMeta && lastReportMeta.period) ||
         String(new Date().getFullYear());
       var profile = pack && pack.getPeriod ? pack.getPeriod(period) : {};
-      var list = global.ReportRevisionEngine.previewChanges(text, null, profile);
+      var list = global.ReportRevisionEngine.previewChanges(text, null, profile, pack);
       return list.length ? list : ['写入对话补充说明'];
     }
     return ['写入对话补充说明'];

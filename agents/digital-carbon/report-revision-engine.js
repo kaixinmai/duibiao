@@ -383,12 +383,24 @@
       }
     });
 
-    // 兜底：整句只有一个数，且含修正语气
-    if (!out.length && /是|为|改成|改为|调整|修正|更正|应该/.test(raw)) {
+    // 兜底：整句只有一个数，且含修正语气（hint 可能很短，交给上下文补全）
+    if (!out.length && /是|为|改成|改为|调整|修正|更正|应该|等于|=/.test(raw)) {
       var one = raw.match(/(-?[0-9]+(?:\.[0-9]+)?)/);
       if (one) {
-        push(raw.replace(one[0], '').replace(/是|为|改成|改为|调整为|更新为|应该是|应为/g, ''), parseFloat(one[1]), '');
+        push(
+          raw
+            .replace(one[0], '')
+            .replace(/是|为|改成|改为|调整为|更新为|应该是|应为|不对|错了|那|还是/g, '')
+            .trim(),
+          parseFloat(one[1]),
+          ''
+        );
       }
+    }
+    // 纯数字短句：也产出一条空 hint，供上下文联动
+    if (!out.length) {
+      var bare = raw.match(/^(-?[0-9]+(?:\.[0-9]+)?)\s*(?:kgce\s*\/?\s*t|tco[₂2]e?\s*\/?\s*t)?$/i);
+      if (bare) push('', parseFloat(bare[1]), '');
     }
 
     // 去重：同一 hint+value 只保留一条；优先保留带列名的；弱 hint 被强 hint 覆盖则丢弃
@@ -402,6 +414,7 @@
         if (o.value !== u.value) return false;
         var on = norm(o.hint);
         var un = norm(u.hint);
+        if (!un) return !!on;
         if (o.columnHint && !u.columnHint && on.indexOf(un.slice(0, Math.min(6, un.length))) >= 0) return true;
         if (on.length > un.length && on.indexOf(un) >= 0) return true;
         return false;
@@ -410,8 +423,84 @@
       var k = norm(u.hint) + '|' + u.value + '|' + norm(u.columnHint || '');
       if (seen[k]) return false;
       seen[k] = true;
-      return u.hint.length >= 1;
+      // 允许空 hint（上下文短句）
+      return true;
     });
+  }
+
+  /** 是否像「承接上一指标」的短回复：是465 / 改成465 / 465 */
+  function isContextualFollowUp(text) {
+    var raw = String(text || '').trim().replace(/,/g, '');
+    if (!raw) return false;
+    if (/[，。；;\n]/.test(raw)) return false;
+    var stripped = raw
+      .replace(/^(那|还是|不对|错了|哦|嗯|改成|改为|调整为|更新为|修正为|更正为|应该是|应为|是|为|等于|=|:|：)+/g, '')
+      .trim();
+    if (/^(-?[0-9]+(?:\.[0-9]+)?)\s*(?:kgce\s*\/?\s*t|tco[₂2]e?\s*\/?\s*t)?$/i.test(stripped)) {
+      return true;
+    }
+    // 「是465」类：去掉语气词后几乎只剩数字
+    var rest = stripped.replace(/(-?[0-9]+(?:\.[0-9]+)?)/, '').replace(/\s+/g, '');
+    return rest.length <= 2 && /(-?[0-9]+(?:\.[0-9]+)?)/.test(stripped);
+  }
+
+  function getRevisionContext(pack) {
+    if (pack && pack.revisionContext && pack.revisionContext.label) return pack.revisionContext;
+    try {
+      var raw = sessionStorage.getItem('jsl-revision-context');
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+
+  function setRevisionContext(pack, ctx) {
+    if (pack) pack.revisionContext = ctx || null;
+    try {
+      if (ctx) sessionStorage.setItem('jsl-revision-context', JSON.stringify(ctx));
+      else sessionStorage.removeItem('jsl-revision-context');
+    } catch (e) {}
+  }
+
+  /**
+   * 结合上一轮修正上下文，解析本轮话术
+   */
+  function resolveUtterances(text, pack) {
+    var utterances = parseUtterances(text);
+    var ctx = getRevisionContext(pack);
+
+    function bindContext(u) {
+      if (!ctx) return u;
+      u.hint = ctx.hint || ctx.label;
+      u.columnHint = u.columnHint || ctx.columnHint || '';
+      u.fieldId = ctx.fieldId || null;
+      u.label = ctx.label || u.label;
+      u.fromContext = true;
+      return u;
+    }
+
+    // 短回复：直接承接上一指标
+    if (isContextualFollowUp(text) && ctx) {
+      var num = String(text).replace(/,/g, '').match(/(-?[0-9]+(?:\.[0-9]+)?)/);
+      if (num) {
+        return [
+          bindContext({
+            hint: ctx.hint || ctx.label,
+            value: parseFloat(num[1]),
+            columnHint: ctx.columnHint || '',
+          }),
+        ];
+      }
+    }
+
+    // 解析结果 hint 过弱时，用上下文补全
+    if (ctx && utterances.length) {
+      utterances = utterances.map(function (u) {
+        if (!u.hint || norm(u.hint).length < 2) return bindContext(u);
+        return u;
+      });
+    }
+
+    return utterances;
   }
 
   function scoreField(field, utterance) {
@@ -499,6 +588,26 @@
     var matches = [];
     var usedFields = {};
     utterances.forEach(function (u) {
+      // 上下文已绑定到明确 fieldId 时，直接命中
+      if (u.fromContext && u.fieldId) {
+        var forced = catalog.filter(function (f) {
+          return f.id === u.fieldId;
+        })[0];
+        if (forced && !usedFields[forced.id]) {
+          usedFields[forced.id] = true;
+          matches.push({
+            fieldId: forced.id,
+            label: forced.label || u.label,
+            value: roundVal(u.value, forced.digits != null ? forced.digits : 4),
+            score: 100,
+            hint: u.hint,
+            columnHint: u.columnHint,
+            fromContext: true,
+          });
+          return;
+        }
+      }
+
       var best = null;
       var bestScore = 0;
       catalog.forEach(function (f) {
@@ -518,9 +627,9 @@
           score: bestScore,
           hint: u.hint,
           columnHint: u.columnHint,
+          fromContext: !!u.fromContext,
         });
       } else if (!best || bestScore < 8) {
-        // 同一数值被多条话术重复解析时跳过空 hint
         if (!u.hint || norm(u.hint).length < 1) return;
         matches.push({
           fieldId: null,
@@ -552,10 +661,11 @@
     var profile = profileHint || (pack.getPeriod && pack.getPeriod()) || {};
     var model = modelHint || {};
     var catalog = buildCatalog(model, profile);
-    var utterances = parseUtterances(text);
+    var utterances = resolveUtterances(text, pack);
     var matches = matchUtterances(catalog, utterances);
     var overrides = ensureOverrides(pack);
     var changes = [];
+    var lastMatched = null;
 
     matches.forEach(function (m) {
       if (m.unmatched || !m.fieldId) {
@@ -579,7 +689,6 @@
         return f.id === m.fieldId;
       })[0];
       if (field && field.setProfile) {
-        // 同年份各周期键一并写入，避免月度/年度报告读到旧值
         var year = String((profile && profile.year) || new Date().getFullYear()).slice(0, 4);
         Object.keys(pack.periods || {}).forEach(function (k) {
           if (k === year || k.indexOf(year + '-') === 0) {
@@ -591,15 +700,29 @@
           field.setProfile(profile, m.value);
         }
       }
-      changes.push(m.label + ' → ' + m.value);
+      var line = m.label + ' → ' + m.value + (m.fromContext ? '（承接上文）' : '');
+      changes.push(line);
+      lastMatched = m;
       pack.reportOverrideLog.push({
         at: new Date().toISOString(),
         fieldId: m.fieldId,
         label: m.label,
         value: m.value,
         hint: m.hint,
+        fromContext: !!m.fromContext,
       });
     });
+
+    // 记住本轮命中的指标，供下一轮短回复联动
+    if (lastMatched && lastMatched.fieldId) {
+      setRevisionContext(pack, {
+        fieldId: lastMatched.fieldId,
+        label: lastMatched.label,
+        hint: lastMatched.hint || lastMatched.label,
+        columnHint: lastMatched.columnHint || '',
+        at: new Date().toISOString(),
+      });
+    }
 
     if (!changes.length) {
       changes.push('已记录补充说明，并据此修订报告相关表述');
@@ -743,12 +866,12 @@
     return html;
   }
 
-  function previewChanges(text, model, profile) {
+  function previewChanges(text, model, profile, pack) {
     var catalog = buildCatalog(model || {}, profile || {});
-    var matches = matchUtterances(catalog, parseUtterances(text));
+    var matches = matchUtterances(catalog, resolveUtterances(text, pack || {}));
     return matches.map(function (m) {
       if (m.unmatched) return '待定位：' + (m.hint || '') + ' → ' + m.value;
-      return (m.label || m.fieldId) + ' → ' + m.value;
+      return (m.label || m.fieldId) + ' → ' + m.value + (m.fromContext ? '（承接上文）' : '');
     });
   }
 
@@ -756,17 +879,22 @@
     if (!pack) return;
     pack.reportOverrides = {};
     pack.reportOverrideLog = [];
+    pack.revisionContext = null;
+    setRevisionContext(pack, null);
   }
 
   global.ReportRevisionEngine = {
     buildCatalog: buildCatalog,
     parseUtterances: parseUtterances,
+    resolveUtterances: resolveUtterances,
+    isContextualFollowUp: isContextualFollowUp,
     matchUtterances: matchUtterances,
     applyChatText: applyChatText,
     applyToModel: applyToModel,
     patchReportHTML: patchReportHTML,
     previewChanges: previewChanges,
     refreshNarratives: refreshNarratives,
+    getRevisionContext: getRevisionContext,
     clear: clear,
   };
 })(window);
